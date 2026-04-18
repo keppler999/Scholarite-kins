@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Scholarite | Vue Promoteur</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        :root {
+            --navy: #0F172A;
+            --gold: #B45309;
+            --bg: #F8FAFC;
+            --white: #FFFFFF;
+        }
+
+        body { font-family: 'Inter', sans-serif; background: var(--bg); margin: 0; display: flex; }
+
+        .sidebar { width: 240px; background: var(--navy); height: 100vh; color: white; padding: 25px; position: fixed; }
+        .main-content { margin-left: 290px; padding: 40px; width: calc(100% - 350px); }
+
+        .header-promoteur { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+
+        /* Cartes de résumé */
+        .summary-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-bottom: 40px; }
+        .card { background: var(--white); padding: 20px; border-radius: 16px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); border-top: 5px solid var(--gold); }
+        .card h4 { color: #64748B; margin: 0; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; }
+        .card .value { font-size: 24px; font-weight: 800; color: var(--navy); margin-top: 10px; display: block; }
+
+        /* Sections Graphiques (Simulées avec du CSS pour le prototype) */
+        .analytics-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 30px; }
+        .chart-box { background: white; padding: 25px; border-radius: 20px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.05); }
+
+        .alert-item { 
+            display: flex; 
+            align-items: center; 
+            gap: 15px; 
+            padding: 15px; 
+            border-bottom: 1px solid #F1F5F9; 
+            font-size: 14px;
+        }
+        .icon-alert { color: #E11D48; background: #FFF1F2; width: 35px; height: 35px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+
+        .btn-refresh { background: var(--navy); color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+    <div class="sidebar">
+        <h3>Scholarite</h3>
+        <p style="font-size: 11px; color: #94A3B8;">TABLEAU DE BORD STRATÉGIQUE</p>
+        <hr style="border: 0.5px solid #1E293B; margin: 20px 0;">
+        <div style="cursor:pointer; color: white;"><i class="fa-solid fa-chart-line"></i> Situation Générale</div>
+        <div style="margin-top:20px; cursor:pointer; color: #94A3B8;"><i class="fa-solid fa-users-gear"></i> Personnel & RH</div>
+        <div style="margin-top:20px; cursor:pointer; color: #94A3B8;"><i class="fa-solid fa-building-columns"></i> Trésorerie</div>
+    </div>
+
+    <div class="main-content">
+        <div class="header-promoteur">
+            <div>
+                <h1 style="margin:0; color: var(--navy);">Bonjour, Promoteur</h1>
+                <p style="color: #64748B;">Voici l'état actuel de votre établissement.</p>
+            </div>
+            <button class="btn-refresh" onclick="location.reload()"><i class="fa-solid fa-rotate"></i> Actualiser</button>
+        </div>
+
+        <div class="summary-grid">
+            <div class="card">
+                <h4>Effectif Total</h4>
+                <span class="value">850 Élèves</span>
+            </div>
+            <div class="card">
+                <h4>Recettes du Mois</h4>
+                <span class="value">4.250.000 FC</span>
+            </div>
+            <div class="card">
+                <h4>Moyenne Générale</h4>
+                <span class="value">64%</span>
+            </div>
+            <div class="card">
+                <h4>Enseignants Présents</h4>
+                <span class="value">28 / 30</span>
+            </div>
+        </div>
+
+        <div class="analytics-grid">
+            <div class="chart-box">
+                <h3><i class="fa-solid fa-money-bill-trend-up"></i> Flux de Trésorerie</h3>
+                <div style="height: 200px; background: #F8FAFC; border-radius: 10px; display: flex; align-items: flex-end; justify-content: space-around; padding: 10px;">
+                    <div style="width: 40px; background: var(--navy); height: 40%; border-radius: 5px;"></div>
+                    <div style="width: 40px; background: var(--navy); height: 60%; border-radius: 5px;"></div>
+                    <div style="width: 40px; background: var(--navy); height: 85%; border-radius: 5px;"></div>
+                    <div style="width: 40px; background: var(--gold); height: 70%; border-radius: 5px;"></div>
+                </div>
+                <p style="text-align: center; font-size: 12px; color: #94A3B8; margin-top: 10px;">Jan | Fév | Mar | Avr (Projection)</p>
+            </div>
+
+            <div class="chart-box">
+                <h3><i class="fa-solid fa-bell"></i> Alertes Système</h3>
+                <div class="alert-item">
+                    <div class="icon-alert"><i class="fa-solid fa-triangle-exclamation"></i></div>
+                    <div>
+                        <strong>Retard de paiement</strong>
+                        <p style="margin:0; font-size:12px; color:#64748B;">42 élèves en 3e Électricité</p>
+                    </div>
+                </div>
+                <div class="alert-item">
+                    <div class="icon-alert" style="color: #B45309; background: #FFFBEB;"><i class="fa-solid fa-clock"></i></div>
+                    <div>
+                        <strong>Notes manquantes</strong>
+                        <p style="margin:0; font-size:12px; color:#64748B;">Chimie - 2e Commerciale</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Le Promoteur pourra ici consulter les données consolidées de Supabase
+        const SUPABASE_URL = "https://chpydetdbfugwwhsvgin.supabase.co"; 
+        const SUPABASE_KEY = "Sb_publishable_G3rNGdnIihPNVfaLj1C4VQ_1TUBFh_z"; 
+        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    </script>
+</body>
+</html>
+
