@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scholarite | Fondation du Système</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        :root {
+            --navy: #0F172A;
+            --gold: #B45309;
+            --slate: #64748B;
+            --bg: #F8FAFC;
+            --white: #FFFFFF;
+            --border: #E2E8F0;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .init-card {
+            background: var(--white);
+            padding: 40px;
+            border-radius: 24px;
+            box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.15);
+            width: 100%;
+            max-width: 450px;
+            border-top: 10px solid var(--navy);
+        }
+
+        .logo-area {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .logo-icon {
+            background: var(--navy);
+            color: white;
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 24px;
+            margin: 0 auto 15px;
+        }
+
+        h2 { color: var(--navy); margin: 0; font-size: 24px; text-align: center; }
+        p.subtitle { color: var(--slate); font-size: 14px; text-align: center; margin-top: 5px; }
+
+        .form-group { margin-top: 20px; }
+        label { 
+            display: block; 
+            color: var(--navy); 
+            font-weight: 700; 
+            margin-bottom: 8px; 
+            font-size: 12px; 
+            text-transform: uppercase;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid var(--border);
+            border-radius: 10px;
+            box-sizing: border-box;
+            outline: none;
+            transition: 0.3s;
+        }
+
+        input:focus { border-color: var(--gold); }
+
+        .btn-install {
+            width: 100%;
+            background-color: var(--navy);
+            color: white;
+            padding: 15px;
+            border: none;
+            border-radius: 10px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 25px;
+            transition: 0.3s;
+        }
+
+        .btn-install:hover { background-color: #000000; transform: translateY(-2px); }
+    </style>
+</head>
+<body>
+    <div class="init-card">
+        <div class="logo-area">
+            <div class="logo-icon"><i class="fa-solid fa-graduation-cap"></i></div>
+            <h2>Initialisation Master</h2>
+            <p class="subtitle">Enregistrement de l'autorité administrative</p>
+        </div>
+        
+        <div class="form-group">
+            <label>Nom de l'École</label>
+            <input type="text" placeholder="ex: Collège Maranatha">
+        </div>
+        
+        <div class="form-group">
+            <label>Nom du Directeur (D.E)</label>
+            <input type="text" placeholder="Nom complet">
+        </div>
+
+        <div class="form-group">
+            <label>Mot de passe Système</label>
+            <input type="password" placeholder="••••••••">
+        </div>
+
+        <div class="form-group">
+            <label>Clé de Licence</label>
+            <input type="text" placeholder="SCH-2026-XXXX">
+        </div>
+
+        <button class="btn-install" onclick="alert('Installation système en cours...')">ACTIVER SCHOLARITE</button>
+    </div>
+</body>
+</html>
+
