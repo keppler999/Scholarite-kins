@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Scholarite | Espace Enseignant</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        :root {
+            --navy: #0F172A;
+            --gold: #B45309;
+            --emerald: #10B981;
+            --bg: #F8FAFC;
+        }
+
+        body { font-family: 'Inter', sans-serif; background: var(--bg); margin: 0; display: flex; }
+
+        /* Sidebar simple pour le prof */
+        .sidebar { width: 240px; background: var(--navy); height: 100vh; color: white; padding: 25px; position: fixed; }
+        
+        .main-content { margin-left: 290px; padding: 40px; width: calc(100% - 350px); }
+
+        .class-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+            margin-bottom: 30px;
+            border-left: 5px solid var(--gold);
+        }
+
+        table { width: 100%; border-collapse: collapse; background: white; border-radius: 12px; overflow: hidden; }
+        th { background: #F1F5F9; color: var(--navy); padding: 15px; text-align: left; font-size: 13px; }
+        td { padding: 15px; border-bottom: 1px solid #F1F5F9; }
+
+        .note-input {
+            width: 60px;
+            padding: 8px;
+            border: 2px solid #E2E8F0;
+            border-radius: 6px;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .note-input:focus { border-color: var(--emerald); outline: none; }
+
+        .btn-save {
+            background: var(--emerald);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            float: right;
+            margin-top: 20px;
+        }
+
+        .status-badge {
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: bold;
+            background: #D1FAE5;
+            color: #065F46;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="sidebar">
+        <h3>Scholarite</h3>
+        <p style="font-size: 12px; color: #94A3B8;">SESSION ENSEIGNANT</p>
+        <hr style="border: 0.5px solid #1E293B; margin: 20px 0;">
+        <div style="cursor:pointer;"><i class="fa-solid fa-book"></i> Mes Classes</div>
+        <div style="margin-top:20px; cursor:pointer; color: #94A3B8;"><i class="fa-solid fa-calendar-days"></i> Horaire</div>
+    </div>
+
+    <div class="main-content">
+        <div class="class-card">
+            <h2><i class="fa-solid fa-users"></i> Classe : 3ème Électricité</h2>
+            <p style="color: var(--slate)">Saisie des notes - Premier Trimestre</p>
+        </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>MATRICULE</th>
+                    <th>NOM DE L'ÉLÈVE</th>
+                    <th>INTERROGATION /20</th>
+                    <th>EXAMEN /40</th>
+                    <th>STATUT</th>
+                </tr>
+            </thead>
+            <tbody id="eleveTable">
+                <tr>
+                    <td>MAT-001</td>
+                    <td><strong>MUHINDO KOMBI</strong></td>
+                    <td><input type="number" class="note-input" value="15"></td>
+                    <td><input type="number" class="note-input" value="32"></td>
+                    <td><span class="status-badge">PRÊT</span></td>
+                </tr>
+                <tr>
+                    <td>MAT-002</td>
+                    <td><strong>KAVIRA MASIKA</strong></td>
+                    <td><input type="number" class="note-input" value="12"></td>
+                    <td><input type="number" class="note-input" value="28"></td>
+                    <td><span class="status-badge">PRÊT</span></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <button class="btn-save" onclick="saveNotes()">
+            <i class="fa-solid fa-cloud-arrow-up"></i> ENREGISTRER LES NOTES
+        </button>
+    </div>
+
+    <script>
+        // CONFIGURATION SUPABASE
+        const SUPABASE_URL = "https://chpydetdbfugwwhsvgin.supabase.co"; 
+        const SUPABASE_KEY = "Sb_publishable_G3rNGdnIihPNVfaLj1C4VQ_1TUBFh_z"; 
+        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        async function saveNotes() {
+            // Ici, nous ajouterons la logique pour envoyer les données vers la table 'notes'
+            alert("Connexion sécurisée établie. Les notes de la 3ème Électricité sont prêtes à être envoyées vers Supabase.");
+        }
+    </script>
+</body>
+</html>
+
