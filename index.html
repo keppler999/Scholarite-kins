@@ -10,7 +10,7 @@
         :root {
             --navy: #0F172A;
             --gold: #B45309;
-            --bg: #0F172A; /* Fond sombre pour le luxe */
+            --bg: #0F172A;
             --white: #FFFFFF;
         }
 
@@ -22,19 +22,20 @@
             display: flex;
             justify-content: center;
             align-items: center;
+            color: var(--navy);
         }
 
-        .login-container {
+        .login-card {
             background: var(--white);
             padding: 40px;
             border-radius: 24px;
-            width: 100%;
+            width: 90%;
             max-width: 400px;
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
             text-align: center;
         }
 
-        .logo-box {
+        .logo-icon {
             background: var(--navy);
             color: white;
             width: 60px;
@@ -47,11 +48,11 @@
             margin: 0 auto 20px;
         }
 
-        h2 { color: var(--navy); margin-bottom: 10px; }
+        h2 { margin: 0 0 10px 0; font-size: 22px; }
         p { color: #64748B; font-size: 14px; margin-bottom: 30px; }
 
-        .input-group { text-align: left; margin-bottom: 20px; }
-        label { display: block; font-weight: bold; font-size: 12px; margin-bottom: 5px; color: var(--navy); }
+        .input-group { text-align: left; margin-bottom: 25px; }
+        label { display: block; font-weight: bold; font-size: 11px; margin-bottom: 8px; color: #64748B; letter-spacing: 1px; }
         
         input {
             width: 100%;
@@ -59,14 +60,14 @@
             border: 2px solid #E2E8F0;
             border-radius: 12px;
             box-sizing: border-box;
-            font-size: 16px;
+            font-size: 18px;
             text-align: center;
-            letter-spacing: 2px;
             font-weight: bold;
             transition: 0.3s;
+            text-transform: uppercase;
         }
 
-        input:focus { border-color: var(--gold); outline: none; }
+        input:focus { border-color: var(--gold); outline: none; box-shadow: 0 0 0 4px rgba(180, 83, 9, 0.1); }
 
         .btn-login {
             width: 100%;
@@ -79,69 +80,76 @@
             font-weight: bold;
             cursor: pointer;
             transition: 0.3s;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
         }
 
-        .btn-login:hover { background: #1E293B; transform: translateY(-2px); }
+        .btn-login:hover { background: #1E293B; transform: translateY(-1px); }
+        .btn-login:disabled { background: #94A3B8; cursor: not-allowed; }
 
-        .footer-text { margin-top: 25px; font-size: 11px; color: #94A3B8; }
+        .footer { margin-top: 30px; font-size: 11px; color: #94A3B8; line-height: 1.5; }
     </style>
 </head>
 <body>
 
-    <div class="login-container">
-        <div class="logo-box">
+    <div class="login-card">
+        <div class="logo-icon">
             <i class="fa-solid fa-shield-halved"></i>
         </div>
-        <h2>Accès Scholarite</h2>
-        <p>Entrez votre code d'accès personnel pour continuer.</p>
+        <h2>Système Scholarite</h2>
+        <p>Veuillez entrer votre jeton d'accès pour déverrouiller votre session.</p>
 
         <div class="input-group">
-            <label>CODE DE JETON (TOKEN)</label>
-            <input type="text" id="tokenInput" placeholder="SCH-XXXXXX" maxlength="12">
+            <label>JETON D'ACCÈS (TOKEN)</label>
+            <input type="text" id="tokenInput" placeholder="SCH-XXXXXX" autocomplete="off">
         </div>
 
-        <button class="btn-login" id="loginBtn" onclick="tenterConnexion()">
-            <i class="fa-solid fa-right-to-bracket"></i> SE CONNECTER
+        <button class="btn-login" id="loginBtn" onclick="verifierAcces()">
+            <span>SE CONNECTER</span> <i class="fa-solid fa-arrow-right"></i>
         </button>
 
-        <div class="footer-text">
-            Système de Gestion Scolaire Sécurisé <br>
-            © 2026 Scholarite - Collège Maranatha
+        <div class="footer">
+            Propulsé par <strong>Spiral Agence</strong> <br>
+            Sécurisation Cloud Supabase v2.0
         </div>
     </div>
 
     <script>
+        // CONFIGURATION MISE À JOUR AVEC TES IDENTIFIANTS
         const SUPABASE_URL = "https://chpydetdbfugwwhsvgin.supabase.co"; 
-        const SUPABASE_KEY = "Sb_publishable_G3rNGdnIihPNVfaLj1C4VQ_1TUBFh_z"; 
+        const SUPABASE_KEY = "sb_publishable_G3rNGdnIihPNVfaLj1C4VQ_1TUBFh_z"; 
         const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        async function tenterConnexion() {
-            const code = document.getElementById('tokenInput').value.trim();
+        async function verifierAcces() {
+            const input = document.getElementById('tokenInput');
             const btn = document.getElementById('loginBtn');
+            const code = input.value.trim().toUpperCase();
 
             if (!code) {
-                alert("Veuillez entrer un code !");
+                alert("Veuillez saisir votre code.");
                 return;
             }
 
+            // Interface état de chargement
             btn.disabled = true;
-            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Vérification...';
+            btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Vérification...';
 
-            // Recherche du jeton dans la table jetons_acces
-            const { data, error } = await supabase
-                .from('jetons_acces')
-                .select('module_cible, nom_destinataire')
-                .eq('code_jeton', code)
-                .eq('statut', 'DISPONIBLE')
-                .single();
+            try {
+                // Recherche dans la base de données
+                const { data, error } = await supabase
+                    .from('jetons_acces')
+                    .select('module_cible, nom_destinataire')
+                    .eq('code_jeton', code)
+                    .single();
 
-            if (error || !data) {
-                alert("Accès refusé. Code invalide ou déjà utilisé.");
-                btn.disabled = false;
-                btn.innerHTML = '<i class="fa-solid fa-right-to-bracket"></i> SE CONNECTER';
-            } else {
-                // Succès : Redirection selon le rôle
-                alert("Bienvenue " + data.nom_destinataire);
+                if (error || !data) {
+                    throw new Error("Code invalide ou accès expiré.");
+                }
+
+                // Succès : Redirection
+                console.log("Accès accordé à :", data.nom_destinataire);
                 
                 if (data.module_cible === 'PROMOTEUR') {
                     window.location.href = "dashboard-promoteur.html";
@@ -150,11 +158,24 @@
                 } else if (data.module_cible === 'PROF') {
                     window.location.href = "module-enseignant.html";
                 } else {
-                    alert("Erreur de configuration du rôle.");
-                    btn.disabled = false;
+                    alert("Rôle non configuré. Contactez l'administrateur.");
                 }
+
+            } catch (err) {
+                alert(err.message);
+                btn.disabled = false;
+                btn.innerHTML = '<span>SE CONNECTER</span> <i class="fa-solid fa-arrow-right"></i>';
+                input.value = "";
+                input.focus();
             }
         }
+
+        // Permettre la validation avec la touche Entrée
+        document.getElementById('tokenInput').addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') {
+                verifierAcces();
+            }
+        });
     </script>
 </body>
 </html>
