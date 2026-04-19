@@ -2,23 +2,112 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Scholarite | Connexion</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scholarite | Authentification</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
-        body { font-family: 'Inter', sans-serif; background: #0F172A; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-        .login-card { background: white; padding: 40px; border-radius: 20px; width: 100%; max-width: 350px; text-align: center; }
-        input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #DDD; border-radius: 8px; box-sizing: border-box; }
-        button { width: 100%; padding: 12px; background: #B45309; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; }
+        :root {
+            --navy: #0F172A;
+            --gold: #B45309;
+            --bg: #0F172A; /* Fond sombre pour le luxe */
+            --white: #FFFFFF;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            height: 100vh;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .login-container {
+            background: var(--white);
+            padding: 40px;
+            border-radius: 24px;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            text-align: center;
+        }
+
+        .logo-box {
+            background: var(--navy);
+            color: white;
+            width: 60px;
+            height: 60px;
+            border-radius: 15px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 28px;
+            margin: 0 auto 20px;
+        }
+
+        h2 { color: var(--navy); margin-bottom: 10px; }
+        p { color: #64748B; font-size: 14px; margin-bottom: 30px; }
+
+        .input-group { text-align: left; margin-bottom: 20px; }
+        label { display: block; font-weight: bold; font-size: 12px; margin-bottom: 5px; color: var(--navy); }
+        
+        input {
+            width: 100%;
+            padding: 14px;
+            border: 2px solid #E2E8F0;
+            border-radius: 12px;
+            box-sizing: border-box;
+            font-size: 16px;
+            text-align: center;
+            letter-spacing: 2px;
+            font-weight: bold;
+            transition: 0.3s;
+        }
+
+        input:focus { border-color: var(--gold); outline: none; }
+
+        .btn-login {
+            width: 100%;
+            background: var(--navy);
+            color: white;
+            padding: 16px;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .btn-login:hover { background: #1E293B; transform: translateY(-2px); }
+
+        .footer-text { margin-top: 25px; font-size: 11px; color: #94A3B8; }
     </style>
 </head>
 <body>
-    <div class="login-card">
-        <i class="fa-solid fa-user-shield" style="font-size: 40px; color: #0F172A;"></i>
-        <h2>Scholarite Access</h2>
-        <p>Entrez votre code secret</p>
-        <input type="text" id="accessCode" placeholder="Code SCH-XXXXXX">
-        <button onclick="verifierAcces()">SE CONNECTER</button>
+
+    <div class="login-container">
+        <div class="logo-box">
+            <i class="fa-solid fa-shield-halved"></i>
+        </div>
+        <h2>Accès Scholarite</h2>
+        <p>Entrez votre code d'accès personnel pour continuer.</p>
+
+        <div class="input-group">
+            <label>CODE DE JETON (TOKEN)</label>
+            <input type="text" id="tokenInput" placeholder="SCH-XXXXXX" maxlength="12">
+        </div>
+
+        <button class="btn-login" id="loginBtn" onclick="tenterConnexion()">
+            <i class="fa-solid fa-right-to-bracket"></i> SE CONNECTER
+        </button>
+
+        <div class="footer-text">
+            Système de Gestion Scolaire Sécurisé <br>
+            © 2026 Scholarite - Collège Maranatha
+        </div>
     </div>
 
     <script>
@@ -26,24 +115,46 @@
         const SUPABASE_KEY = "Sb_publishable_G3rNGdnIihPNVfaLj1C4VQ_1TUBFh_z"; 
         const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        async function verifierAcces() {
-            const code = document.getElementById('accessCode').value;
-            
+        async function tenterConnexion() {
+            const code = document.getElementById('tokenInput').value.trim();
+            const btn = document.getElementById('loginBtn');
+
+            if (!code) {
+                alert("Veuillez entrer un code !");
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Vérification...';
+
+            // Recherche du jeton dans la table jetons_acces
             const { data, error } = await supabase
                 .from('jetons_acces')
-                .select('module_cible')
+                .select('module_cible, nom_destinataire')
                 .eq('code_jeton', code)
+                .eq('statut', 'DISPONIBLE')
                 .single();
 
-            if (data) {
-                if(data.module_cible === 'PROMOTEUR') window.location.href = "dashboard-promoteur.html";
-                else if(data.module_cible === 'COMPTABLE') window.location.href = "module-comptable.html";
-                else if(data.module_cible === 'PROF') window.location.href = "module-enseignant.html";
+            if (error || !data) {
+                alert("Accès refusé. Code invalide ou déjà utilisé.");
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-right-to-bracket"></i> SE CONNECTER';
             } else {
-                alert("Code invalide !");
+                // Succès : Redirection selon le rôle
+                alert("Bienvenue " + data.nom_destinataire);
+                
+                if (data.module_cible === 'PROMOTEUR') {
+                    window.location.href = "dashboard-promoteur.html";
+                } else if (data.module_cible === 'COMPTABLE') {
+                    window.location.href = "module-comptable.html";
+                } else if (data.module_cible === 'PROF') {
+                    window.location.href = "module-enseignant.html";
+                } else {
+                    alert("Erreur de configuration du rôle.");
+                    btn.disabled = false;
+                }
             }
         }
     </script>
 </body>
 </html>
-
