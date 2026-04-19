@@ -3,179 +3,61 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Scholarite | Authentification</title>
+    <title>Scholarite Debug | Mobile</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
-        :root {
-            --navy: #0F172A;
-            --gold: #B45309;
-            --bg: #0F172A;
-            --white: #FFFFFF;
-        }
-
-        body {
-            font-family: 'Inter', sans-serif;
-            background: var(--bg);
-            height: 100vh;
-            margin: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            color: var(--navy);
-        }
-
-        .login-card {
-            background: var(--white);
-            padding: 40px;
-            border-radius: 24px;
-            width: 90%;
-            max-width: 400px;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-            text-align: center;
-        }
-
-        .logo-icon {
-            background: var(--navy);
-            color: white;
-            width: 60px;
-            height: 60px;
-            border-radius: 15px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 28px;
-            margin: 0 auto 20px;
-        }
-
-        h2 { margin: 0 0 10px 0; font-size: 22px; }
-        p { color: #64748B; font-size: 14px; margin-bottom: 30px; }
-
-        .input-group { text-align: left; margin-bottom: 25px; }
-        label { display: block; font-weight: bold; font-size: 11px; margin-bottom: 8px; color: #64748B; letter-spacing: 1px; }
-        
-        input {
-            width: 100%;
-            padding: 14px;
-            border: 2px solid #E2E8F0;
-            border-radius: 12px;
-            box-sizing: border-box;
-            font-size: 18px;
-            text-align: center;
-            font-weight: bold;
-            transition: 0.3s;
-            text-transform: uppercase;
-        }
-
-        input:focus { border-color: var(--gold); outline: none; box-shadow: 0 0 0 4px rgba(180, 83, 9, 0.1); }
-
-        .btn-login {
-            width: 100%;
-            background: var(--navy);
-            color: white;
-            padding: 16px;
-            border: none;
-            border-radius: 12px;
-            font-size: 16px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: 0.3s;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .btn-login:hover { background: #1E293B; transform: translateY(-1px); }
-        .btn-login:disabled { background: #94A3B8; cursor: not-allowed; }
-
-        .footer { margin-top: 30px; font-size: 11px; color: #94A3B8; line-height: 1.5; }
+        body { font-family: sans-serif; padding: 20px; background: #0F172A; color: white; }
+        .card { background: white; color: #333; padding: 20px; border-radius: 10px; }
+        input { width: 100%; padding: 15px; margin: 10px 0; box-sizing: border-box; font-size: 18px; }
+        button { width: 100%; padding: 15px; background: #B45309; color: white; border: none; font-weight: bold; }
+        #debug-box { margin-top: 20px; padding: 10px; background: #000; color: #00FF00; font-family: monospace; font-size: 12px; border-radius: 5px; overflow-y: auto; max-height: 150px; }
     </style>
 </head>
 <body>
 
-    <div class="login-card">
-        <div class="logo-icon">
-            <i class="fa-solid fa-shield-halved"></i>
-        </div>
-        <h2>Système Scholarite</h2>
-        <p>Veuillez entrer votre jeton d'accès pour déverrouiller votre session.</p>
-
-        <div class="input-group">
-            <label>JETON D'ACCÈS (TOKEN)</label>
-            <input type="text" id="tokenInput" placeholder="SCH-XXXXXX" autocomplete="off">
-        </div>
-
-        <button class="btn-login" id="loginBtn" onclick="verifierAcces()">
-            <span>SE CONNECTER</span> <i class="fa-solid fa-arrow-right"></i>
-        </button>
-
-        <div class="footer">
-            Propulsé par <strong>Spiral Agence</strong> <br>
-            Sécurisation Cloud Supabase v2.0
-        </div>
+    <div class="card">
+        <h2>Connexion Scholarite</h2>
+        <input type="text" id="tokenInput" placeholder="SCH-2026">
+        <button onclick="verifierAcces()">DÉVERROUILLER</button>
     </div>
 
+    <div id="debug-box">Système prêt... En attente d'action.</div>
+
     <script>
-        // CONFIGURATION MISE À JOUR AVEC TES IDENTIFIANTS
+        const log = (msg) => { document.getElementById('debug-box').innerHTML += "<br>> " + msg; };
+
         const SUPABASE_URL = "https://chpydetdbfugwwhsvgin.supabase.co"; 
         const SUPABASE_KEY = "sb_publishable_G3rNGdnIihPNVfaLj1C4VQ_1TUBFh_z"; 
         const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         async function verifierAcces() {
-            const input = document.getElementById('tokenInput');
-            const btn = document.getElementById('loginBtn');
-            const code = input.value.trim().toUpperCase();
-
-            if (!code) {
-                alert("Veuillez saisir votre code.");
-                return;
-            }
-
-            // Interface état de chargement
-            btn.disabled = true;
-            btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Vérification...';
+            const code = document.getElementById('tokenInput').value.trim().toUpperCase();
+            log("Tentative avec : " + code);
 
             try {
-                // Recherche dans la base de données
                 const { data, error } = await supabase
                     .from('jetons_acces')
-                    .select('module_cible, nom_destinataire')
+                    .select('*')
                     .eq('code_jeton', code)
-                    .single();
+                    .maybeSingle();
 
-                if (error || !data) {
-                    throw new Error("Code invalide ou accès expiré.");
+                if (error) {
+                    log("ERREUR SUPABASE : " + error.message);
+                    alert("Erreur : " + error.message);
+                    return;
                 }
 
-                // Succès : Redirection
-                console.log("Accès accordé à :", data.nom_destinataire);
-                
-                if (data.module_cible === 'PROMOTEUR') {
+                if (data) {
+                    log("SUCCESS : Jeton trouvé ! Redirection...");
                     window.location.href = "dashboard-promoteur.html";
-                } else if (data.module_cible === 'COMPTABLE') {
-                    window.location.href = "module-comptable.html";
-                } else if (data.module_cible === 'PROF') {
-                    window.location.href = "module-enseignant.html";
                 } else {
-                    alert("Rôle non configuré. Contactez l'administrateur.");
+                    log("ÉCHEC : Code inconnu dans la table jetons_acces.");
+                    alert("Code non reconnu.");
                 }
-
             } catch (err) {
-                alert(err.message);
-                btn.disabled = false;
-                btn.innerHTML = '<span>SE CONNECTER</span> <i class="fa-solid fa-arrow-right"></i>';
-                input.value = "";
-                input.focus();
+                log("ERREUR SYSTÈME : " + err.message);
             }
         }
-
-        // Permettre la validation avec la touche Entrée
-        document.getElementById('tokenInput').addEventListener('keypress', function (e) {
-            if (e.key === 'Enter') {
-                verifierAcces();
-            }
-        });
     </script>
 </body>
 </html>
