@@ -3,367 +3,240 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Scholarite | Dashboard Promoteur</title>
+    <title>Scholarite PRO | Dashboard Promoteur</title>
     
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     
     <style>
+        /* ==========================================
+           1. VARIABLES ET DESIGN SYSTEM (Lignes 15-80)
+           ========================================== */
         :root {
-            --primary: #0F172A;   /* Navy / Noir profond */
-            --accent: #B45309;    /* Or / Ambre */
-            --bg-light: #F8FAFC;
+            --primary: #0F172A;
+            --accent: #B45309;
+            --accent-light: #FDE68A;
+            --bg-body: #F1F5F9;
             --white: #FFFFFF;
-            --text-main: #1E293B;
-            --text-muted: #64748B;
+            --text-dark: #0F172A;
+            --text-gray: #64748B;
             --success: #10B981;
             --warning: #F59E0B;
             --danger: #EF4444;
+            --sidebar-width: 280px;
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background: var(--bg-body); color: var(--text-dark); display: flex; min-height: 100vh; }
 
-        body {
-            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            background-color: var(--bg-light);
-            color: var(--text-main);
-            display: flex;
-            min-height: 100vh;
-        }
+        /* ==========================================
+           2. NAVIGATION LATERALE (Lignes 81-150)
+           ========================================== */
+        .sidebar { width: var(--sidebar-width); background: var(--primary); color: white; position: fixed; height: 100vh; display: flex; flex-direction: column; box-shadow: 4px 0 10px rgba(0,0,0,0.1); }
+        .sidebar-brand { padding: 40px 20px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .brand-name { font-size: 26px; font-weight: 900; color: var(--accent); letter-spacing: 3px; }
+        
+        .nav-menu { padding: 25px 0; flex-grow: 1; }
+        .nav-link { padding: 18px 30px; display: flex; align-items: center; gap: 15px; color: rgba(255,255,255,0.6); text-decoration: none; cursor: pointer; transition: all 0.3s ease; border-left: 5px solid transparent; }
+        .nav-link i { width: 20px; font-size: 18px; }
+        .nav-link:hover { background: rgba(255,255,255,0.05); color: var(--white); }
+        .nav-link.active { background: rgba(180, 83, 9, 0.1); color: var(--accent); border-left-color: var(--accent); font-weight: 600; }
 
-        /* --- SIDEBAR (BARRE LATERALE) --- */
-        .sidebar {
-            width: 280px;
-            background: var(--primary);
-            color: white;
-            display: flex;
-            flex-direction: column;
-            position: fixed;
-            height: 100vh;
-            transition: 0.3s;
-            z-index: 1000;
-        }
+        /* ==========================================
+           3. MISE EN PAGE PRINCIPALE (Lignes 151-250)
+           ========================================== */
+        .main-view { margin-left: var(--sidebar-width); flex-grow: 1; padding: 40px; }
+        .header-box { display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px; }
+        .header-title h1 { font-size: 28px; font-weight: 800; margin-bottom: 5px; }
+        .header-title p { color: var(--text-gray); font-size: 14px; }
 
-        .sidebar-header {
-            padding: 30px 20px;
-            text-align: center;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-        }
+        .stats-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 25px; margin-bottom: 40px; }
+        .card-stat { background: var(--white); padding: 30px; border-radius: 24px; box-shadow: var(--shadow-md); border: 1px solid rgba(0,0,0,0.03); transition: 0.3s; }
+        .card-stat:hover { transform: translateY(-5px); }
+        .stat-label { font-size: 12px; font-weight: 700; color: var(--text-gray); text-transform: uppercase; letter-spacing: 1px; display: flex; align-items: center; gap: 8px; margin-bottom: 15px; }
+        .stat-number { font-size: 36px; font-weight: 900; color: var(--primary); }
 
-        .logo-text {
-            font-size: 24px;
-            font-weight: 800;
-            letter-spacing: 2px;
-            color: var(--accent);
-        }
+        /* ==========================================
+           4. MODULES ET TABLEAUX (Lignes 251-380)
+           ========================================== */
+        .content-panel { background: var(--white); border-radius: 24px; padding: 35px; box-shadow: var(--shadow-md); }
+        .panel-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; padding-bottom: 15px; border-bottom: 2px solid var(--bg-body); }
+        
+        table { width: 100%; border-collapse: separate; border-spacing: 0 10px; }
+        th { padding: 15px 20px; text-align: left; font-size: 11px; text-transform: uppercase; color: var(--text-gray); font-weight: 800; }
+        td { padding: 20px; background: #fff; border-top: 1px solid #f1f5f9; border-bottom: 1px solid #f1f5f9; font-size: 14px; }
+        td:first-child { border-left: 1px solid #f1f5f9; border-radius: 12px 0 0 12px; }
+        td:last-child { border-right: 1px solid #f1f5f9; border-radius: 0 12px 12px 0; }
 
-        .nav-links {
-            padding: 20px 0;
-            flex-grow: 1;
-        }
+        /* Performance Profs Design */
+        .prof-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 25px; }
+        .prof-widget { background: #fff; border-radius: 20px; padding: 25px; border: 1px solid #e2e8f0; }
+        .prof-info { display: flex; align-items: center; gap: 15px; margin-bottom: 20px; }
+        .prof-img { width: 60px; height: 60px; background: var(--primary); border-radius: 15px; display: flex; align-items: center; justify-content: center; color: var(--accent); font-size: 24px; }
+        .perf-track { height: 10px; background: #f1f5f9; border-radius: 5px; margin: 15px 0; overflow: hidden; }
+        .perf-bar { height: 100%; background: linear-gradient(90deg, var(--accent), #d97706); transition: 1.5s ease-out; }
 
-        .nav-item {
-            padding: 15px 25px;
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            color: rgba(255,255,255,0.7);
-            text-decoration: none;
-            transition: 0.3s;
-            cursor: pointer;
-        }
+        .badge-status { padding: 6px 14px; border-radius: 8px; font-size: 11px; font-weight: 800; }
+        .status-success { background: #dcfce7; color: #166534; }
+        .status-danger { background: #fee2e2; color: #991b1b; }
 
-        .nav-item:hover, .nav-item.active {
-            background: rgba(255,255,255,0.05);
-            color: var(--accent);
-            border-left: 4px solid var(--accent);
-        }
-
-        /* --- MAIN CONTENT --- */
-        .main-content {
-            margin-left: 280px;
-            flex-grow: 1;
-            padding: 30px;
-        }
-
-        .top-bar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 40px;
-        }
-
-        .user-profile {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            background: white;
-            padding: 8px 20px;
-            border-radius: 50px;
-            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
-        }
-
-        /* --- STAT CARDS (SITUATION GENERALE) --- */
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-            gap: 25px;
-            margin-bottom: 40px;
-        }
-
-        .stat-card {
-            background: var(--white);
-            padding: 25px;
-            border-radius: 20px;
-            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.05);
-            border-bottom: 4px solid transparent;
-            transition: 0.3s;
-        }
-
-        .stat-card:hover { transform: translateY(-5px); border-bottom-color: var(--accent); }
-
-        .stat-header {
-            display: flex;
-            justify-content: space-between;
-            color: var(--text-muted);
-            font-size: 14px;
-            font-weight: 600;
-            margin-bottom: 15px;
-        }
-
-        .stat-value {
-            font-size: 32px;
-            font-weight: 800;
-            color: var(--primary);
-        }
-
-        /* --- TABLEAUX & MODULES --- */
-        .module-section {
-            background: white;
-            border-radius: 20px;
-            padding: 25px;
-            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.05);
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-        }
-
-        th {
-            text-align: left;
-            padding: 15px;
-            background: var(--bg-light);
-            color: var(--text-muted);
-            font-size: 12px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        td {
-            padding: 15px;
-            border-bottom: 1px solid #F1F5F9;
-            font-size: 14px;
-        }
-
-        /* --- FEU TRICOLORE --- */
-        .badge {
-            padding: 5px 12px;
-            border-radius: 50px;
-            font-size: 11px;
-            font-weight: 700;
-            text-transform: uppercase;
-        }
-        .bg-vert { background: #DCFCE7; color: #166534; }
-        .bg-orange { background: #FEF3C7; color: #92400E; }
-        .bg-rouge { background: #FEE2E2; color: #991B1B; }
-
-        /* --- RESPONSIVE --- */
-        @media (max-width: 1024px) {
-            .sidebar { width: 80px; }
-            .sidebar .nav-text, .sidebar .logo-text { display: none; }
-            .main-content { margin-left: 80px; }
-        }
+        @media (max-width: 1024px) { .sidebar { width: 80px; } .main-view { margin-left: 80px; } .nav-text, .brand-name { display: none; } }
     </style>
 </head>
 <body>
 
-    <nav class="sidebar">
-        <div class="sidebar-header">
-            <span class="logo-text">SCHOLARITE</span>
+    <aside class="sidebar">
+        <div class="sidebar-brand">
+            <span class="brand-name">SCHOLARITE</span>
         </div>
-        <div class="nav-links">
-            <div class="nav-item active" onclick="showSection('general')">
-                <i class="fa-solid fa-chart-line"></i>
-                <span class="nav-text">Situation Générale</span>
+        <nav class="nav-menu">
+            <div class="nav-link active" onclick="switchTab('general', this)">
+                <i class="fa-solid fa-house"></i> <span class="nav-text">Situation Générale</span>
             </div>
-            <div class="nav-item" onclick="showSection('eleves')">
-                <i class="fa-solid fa-user-graduate"></i>
-                <span class="nav-text">Casier Élèves</span>
+            <div class="nav-link" onclick="switchTab('eleves', this)">
+                <i class="fa-solid fa-graduation-cap"></i> <span class="nav-text">Casier Virtuel</span>
             </div>
-            <div class="nav-item" onclick="showSection('finances')">
-                <i class="fa-solid fa-wallet"></i>
-                <span class="nav-text">Pôle Finance</span>
+            <div class="nav-link" onclick="switchTab('profs', this)">
+                <i class="fa-solid fa-user-tie"></i> <span class="nav-text">Performance Profs</span>
             </div>
-            <div class="nav-item" onclick="showSection('profs')">
-                <i class="fa-solid fa-chalkboard-user"></i>
-                <span class="nav-text">Performance Profs</span>
+            <div class="nav-link" onclick="switchTab('finances', this)">
+                <i class="fa-solid fa-sack-dollar"></i> <span class="nav-text">Pôle Finance</span>
             </div>
-            <div class="nav-item" onclick="showSection('archives')">
-                <i class="fa-solid fa-box-archive"></i>
-                <span class="nav-text">Archives</span>
-            </div>
+        </nav>
+        <div class="nav-link" style="margin-top: auto; border-top: 1px solid rgba(255,255,255,0.1);" onclick="location.href='index.html'">
+            <i class="fa-solid fa-power-off"></i> <span class="nav-text">Quitter</span>
         </div>
-        <div class="nav-item" style="margin-top: auto; border-top: 1px solid rgba(255,255,255,0.1);" onclick="logout()">
-            <i class="fa-solid fa-right-from-bracket"></i>
-            <span class="nav-text">Déconnexion</span>
-        </div>
-    </nav>
+    </aside>
 
-    <main class="main-content">
-        <div class="top-bar">
-            <h1>Tableau de Bord <span id="currentDate" style="font-size: 14px; color: var(--text-muted); font-weight: normal;"></span></h1>
-            <div class="user-profile">
-                <span id="userName" style="font-weight: 600;">Promoteur</span>
-                <div style="width: 35px; height: 35px; background: var(--accent); border-radius: 50%; display: flex; justify-content: center; align-items: center; color: white;">
-                    <i class="fa-solid fa-user-tie"></i>
+    <main class="main-view">
+        <header class="header-box">
+            <div class="header-title">
+                <h1>Tableau de Bord Premium</h1>
+                <p>Bienvenue, Monsieur le Promoteur Kambale</p>
+            </div>
+            <div id="sync-status" class="badge-status status-success">
+                <i class="fa-solid fa-cloud-check"></i> SYNC SUPABASE : OK
+            </div>
+        </header>
+
+        <div id="view-general" class="tab-view">
+            <div class="stats-container">
+                <div class="card-stat">
+                    <div class="stat-label"><i class="fa-solid fa-users"></i> Effectif Global</div>
+                    <div class="stat-number" id="val-eleves">--</div>
+                </div>
+                <div class="card-stat">
+                    <div class="stat-label"><i class="fa-solid fa-vault"></i> Caisse Totale</div>
+                    <div class="stat-number" id="val-finance">0 $</div>
+                </div>
+                <div class="card-stat">
+                    <div class="stat-label"><i class="fa-solid fa-gavel"></i> Cas de Discipline</div>
+                    <div class="stat-number" id="val-discipline">0</div>
                 </div>
             </div>
-        </div>
-
-        <section id="section-general">
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <div class="stat-header">TOTAL ÉLÈVES <i class="fa-solid fa-users" style="color: var(--accent);"></i></div>
-                    <div class="stat-value" id="count-eleves">0</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-header">CAISSE DU JOUR <i class="fa-solid fa-money-bill-trend-up" style="color: var(--success);"></i></div>
-                    <div class="stat-value" id="total-finance">0 $</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-header">ALERTE DISCIPLINE <i class="fa-solid fa-triangle-exclamation" style="color: var(--danger);"></i></div>
-                    <div class="stat-value" id="count-alertes">0</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-header">PROFESSEURS ACTIFS <i class="fa-solid fa-user-check" style="color: #3B82F6;"></i></div>
-                    <div class="stat-value" id="count-profs">0</div>
-                </div>
-            </div>
-
-            <div class="module-section">
-                <h3>Activités Récentes</h3>
-                <table id="table-activites">
-                    <thead>
-                        <tr>
-                            <th>Heure</th>
-                            <th>Action</th>
-                            <th>Acteur</th>
-                            <th>Statut</th>
-                        </tr>
-                    </thead>
-                    <tbody id="body-activites">
+            <div class="content-panel">
+                <div class="panel-header"><h3>Activités Récentes du Système</h3></div>
+                <table>
+                    <thead><tr><th>Horodatage</th><th>Action Effectuée</th><th>Opérateur</th><th>Impact</th></tr></thead>
+                    <tbody id="logs-body">
                         </tbody>
                 </table>
             </div>
-        </section>
+        </div>
 
-        <section id="section-eleves" style="display:none;">
-            <div class="module-section">
-                <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <h3>Registre des Élèves (Casier Virtuel)</h3>
-                    <button style="background: var(--primary); color: white; padding: 10px 20px; border-radius: 8px; border: none; cursor: pointer;">
-                        <i class="fa-solid fa-plus"></i> Nouvel Élève
-                    </button>
+        <div id="view-profs" class="tab-view" style="display:none;">
+            <div class="panel-header">
+                <h2>Rapport de Performance du Personnel</h2>
+                <button onclick="loadProfs()" style="background:var(--primary); color:white; border:none; padding:10px 20px; border-radius:10px; cursor:pointer;">
+                    <i class="fa-solid fa-rotate"></i> Recalculer les scores
+                </button>
+            </div>
+            <div class="prof-grid" id="prof-list-container">
                 </div>
-                <table id="table-eleves">
-                    <thead>
-                        <tr>
-                            <th>Matricule</th>
-                            <th>Nom & Postnom</th>
-                            <th>Classe</th>
-                            <th>Discipline</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody id="body-eleves"></tbody>
+        </div>
+
+        <div id="view-eleves" class="tab-view" style="display:none;">
+            <div class="content-panel">
+                <div class="panel-header">
+                    <h2>Casier Virtuel des Élèves</h2>
+                    <input type="text" placeholder="Rechercher un matricule..." style="padding:10px; border-radius:8px; border:1px solid #ccc; width:250px;">
+                </div>
+                <table id="eleves-table">
+                    <thead><tr><th>Matricule</th><th>Identité</th><th>Classe</th><th>Statut Discipline</th><th>Action</th></tr></thead>
+                    <tbody id="eleves-body"></tbody>
                 </table>
             </div>
-        </section>
-
+        </div>
     </main>
 
     <script>
-        // CONFIGURATION SUPABASE
         const SUPABASE_URL = "https://chpydetdbfugwwhsvgin.supabase.co"; 
         const SUPABASE_KEY = "sb_publishable_G3rNGdnIihPNVfaLj1C4VQ_1TUBFh_z"; 
         const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        // INITIALISATION
-        document.addEventListener('DOMContentLoaded', () => {
-            document.getElementById('currentDate').innerText = new Date().toLocaleDateString('fr-FR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-            fetchStats();
-            fetchRecentActivites();
-        });
-
-        // CHARGEMENT DES STATS (SITUATION GÉNÉRALE)
-        async function fetchStats() {
-            // Count Eleves
-            const { count: elevesCount } = await supabase.from('eleves').select('*', { count: 'exact', head: true });
-            document.getElementById('count-eleves').innerText = elevesCount || 0;
-
-            // Finance Somme (Exemple simple)
-            const { data: financeData } = await supabase.from('finances').select('montant_paye');
-            const total = financeData ? financeData.reduce((sum, item) => sum + item.montant_paye, 0) : 0;
-            document.getElementById('total-finance').innerText = total + " $";
-
-            // Alertes Discipline (Rouge & Orange)
-            const { count: alertesCount } = await supabase.from('eleves').select('*', { count: 'exact', head: true }).neq('statut_discipline', 'VERT');
-            document.getElementById('count-alertes').innerText = alertesCount || 0;
+        function switchTab(viewId, element) {
+            document.querySelectorAll('.tab-view').forEach(v => v.style.display = 'none');
+            document.getElementById('view-' + viewId).style.display = 'block';
+            document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+            element.classList.add('active');
             
-            // Count Profs
-            const { count: profsCount } = await supabase.from('professeurs').select('*', { count: 'exact', head: true });
-            document.getElementById('count-profs').innerText = profsCount || 0;
+            if(viewId === 'profs') loadProfs();
+            if(viewId === 'eleves') loadEleves();
+            if(viewId === 'general') loadGlobalStats();
         }
 
-        // NAVIGATION ENTRE SECTIONS
-        function showSection(sectionId) {
-            document.querySelectorAll('main section').forEach(s => s.style.display = 'none');
-            document.getElementById('section-' + sectionId).style.display = 'block';
+        async function loadGlobalStats() {
+            const { count } = await supabase.from('eleves').select('*', { count: 'exact', head: true });
+            document.getElementById('val-eleves').innerText = count || 0;
             
-            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-            event.currentTarget.classList.add('active');
-
-            if(sectionId === 'eleves') fetchEleves();
+            const { data: fin } = await supabase.from('finances').select('montant_paye');
+            const total = fin ? fin.reduce((s, i) => s + i.montant_paye, 0) : 0;
+            document.getElementById('val-finance').innerText = total + " $";
         }
 
-        // FETCH ELEVES POUR LE CASIER
-        async function fetchEleves() {
-            const { data, error } = await supabase.from('eleves').select('*');
-            const body = document.getElementById('body-eleves');
-            body.innerHTML = "";
-
-            data.forEach(eleve => {
-                const badgeClass = eleve.statut_discipline === 'VERT' ? 'bg-vert' : (eleve.statut_discipline === 'ORANGE' ? 'bg-orange' : 'bg-rouge');
-                body.innerHTML += `
-                    <tr>
-                        <td><b>${eleve.matricule}</b></td>
-                        <td>${eleve.nom} ${eleve.postnom}</td>
-                        <td>3e Électricité</td>
-                        <td><span class="badge ${badgeClass}">${eleve.statut_discipline}</span></td>
-                        <td>
-                            <button onclick="voirCasier('${eleve.id}')" style="border:none; background:none; color:var(--accent); cursor:pointer;"><i class="fa-solid fa-eye"></i></button>
-                        </td>
-                    </tr>
-                `;
+        async function loadProfs() {
+            const container = document.getElementById('prof-list-container');
+            container.innerHTML = "Analyse des performances...";
+            const { data } = await supabase.from('professeurs').select('*');
+            container.innerHTML = "";
+            data.forEach(p => {
+                const score = Math.max(0, 100 - (p.heures_absent * 5));
+                container.innerHTML += `
+                    <div class="prof-widget">
+                        <div class="prof-info">
+                            <div class="prof-img"><i class="fa-solid fa-user-tie"></i></div>
+                            <div><strong>${p.nom_complet}</strong><br><small>${p.grade_direction}</small></div>
+                        </div>
+                        <div class="perf-track"><div class="perf-bar" style="width:${score}%"></div></div>
+                        <div style="display:flex; justify-content:space-between; font-size:12px;">
+                            <span>Assiduité : ${score}%</span>
+                            <span>Absences : ${p.heures_absent}h</span>
+                        </div>
+                    </div>`;
             });
         }
 
-        function logout() {
-            window.location.href = "index.html";
+        async function loadEleves() {
+            const { data } = await supabase.from('eleves').select('*');
+            const body = document.getElementById('eleves-body');
+            body.innerHTML = "";
+            data.forEach(e => {
+                body.innerHTML += `
+                    <tr>
+                        <td><b>${e.matricule}</b></td>
+                        <td>${e.nom} ${e.postnom}</td>
+                        <td>3e Électricité</td>
+                        <td><span class="badge-status ${e.statut_discipline === 'VERT' ? 'status-success' : 'status-danger'}">${e.statut_discipline}</span></td>
+                        <td><button style="background:none; border:none; color:var(--accent); cursor:pointer;"><i class="fa-solid fa-ellipsis-vertical"></i></button></td>
+                    </tr>`;
+            });
         }
+
+        // Auto-load
+        window.onload = loadGlobalStats;
     </script>
 </body>
-</html>
+    </html>
+    
