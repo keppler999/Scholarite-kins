@@ -2,130 +2,215 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Scholarite | Espace Enseignant</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Platinum ERP | Enseignant Expert</title>
+    
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&family=JetBrains+Mono&display=swap');
+
         :root {
-            --navy: #0F172A;
-            --gold: #B45309;
-            --emerald: #10B981;
-            --bg: #F8FAFC;
+            --primary: #3B82F6;
+            --bg: #020617;
+            --panel: #0F172A;
+            --accent: #B45309;
+            --success: #10B981;
+            --danger: #EF4444;
+            --border: rgba(255, 255, 255, 0.05);
         }
 
-        body { font-family: 'Inter', sans-serif; background: var(--bg); margin: 0; display: flex; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background: var(--bg); color: white; display: flex; height: 100vh; overflow: hidden; }
 
-        /* Sidebar simple pour le prof */
-        .sidebar { width: 240px; background: var(--navy); height: 100vh; color: white; padding: 25px; position: fixed; }
+        /* --- SIDEBAR --- */
+        .sidebar {
+            width: 300px; background: #000; border-right: 1px solid var(--border);
+            padding: 30px; display: flex; flex-direction: column;
+        }
+        .nav-group { margin-bottom: 30px; }
+        .nav-label { font-size: 10px; color: #64748B; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 15px; display: block; }
         
-        .main-content { margin-left: 290px; padding: 40px; width: calc(100% - 350px); }
-
-        .class-card {
-            background: white;
-            border-radius: 15px;
-            padding: 25px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
-            margin-bottom: 30px;
-            border-left: 5px solid var(--gold);
+        .nav-link {
+            padding: 12px 15px; border-radius: 12px; color: #94A3B8; cursor: pointer;
+            display: flex; align-items: center; gap: 12px; transition: 0.3s; margin-bottom: 5px; text-decoration: none;
         }
+        .nav-link.active, .nav-link:hover { background: rgba(59, 130, 246, 0.1); color: var(--primary); }
 
-        table { width: 100%; border-collapse: collapse; background: white; border-radius: 12px; overflow: hidden; }
-        th { background: #F1F5F9; color: var(--navy); padding: 15px; text-align: left; font-size: 13px; }
-        td { padding: 15px; border-bottom: 1px solid #F1F5F9; }
+        /* --- MAIN --- */
+        .main { flex-grow: 1; padding: 40px; overflow-y: auto; display: grid; grid-template-rows: auto 1fr; gap: 30px; }
+        
+        /* --- TOP BAR --- */
+        .top-bar { display: flex; justify-content: space-between; align-items: flex-start; }
+        .session-info { background: var(--panel); padding: 15px 25px; border-radius: 18px; border: 1px solid var(--border); display: flex; gap: 20px; }
+        .info-pill { font-size: 12px; color: #94A3B8; border-right: 1px solid var(--border); padding-right: 20px; }
+        .info-pill:last-child { border: none; }
+        .info-pill b { color: white; display: block; font-size: 14px; }
 
-        .note-input {
-            width: 60px;
-            padding: 8px;
-            border: 2px solid #E2E8F0;
-            border-radius: 6px;
-            text-align: center;
-            font-weight: bold;
-        }
+        /* --- WORKSPACE --- */
+        .workspace-grid { display: grid; grid-template-columns: 1fr 350px; gap: 30px; }
+        .glass-card { background: var(--panel); border-radius: 28px; border: 1px solid var(--border); padding: 30px; position: relative; }
 
-        .note-input:focus { border-color: var(--emerald); outline: none; }
+        /* --- TABS --- */
+        .tabs { display: flex; gap: 10px; margin-bottom: 25px; background: rgba(0,0,0,0.2); padding: 5px; border-radius: 12px; }
+        .tab { padding: 10px 20px; border-radius: 8px; cursor: pointer; font-size: 13px; font-weight: 600; color: #64748B; transition: 0.3s; }
+        .tab.active { background: var(--primary); color: white; }
 
-        .btn-save {
-            background: var(--emerald);
-            color: white;
-            border: none;
-            padding: 12px 25px;
-            border-radius: 8px;
-            font-weight: bold;
-            cursor: pointer;
-            float: right;
-            margin-top: 20px;
-        }
+        /* --- TABLE --- */
+        table { width: 100%; border-collapse: collapse; }
+        th { text-align: left; padding: 12px; color: #64748B; font-size: 11px; border-bottom: 1px solid var(--border); }
+        td { padding: 15px 12px; border-bottom: 1px solid rgba(255,255,255,0.02); }
 
-        .status-badge {
-            padding: 4px 10px;
-            border-radius: 20px;
-            font-size: 11px;
-            font-weight: bold;
-            background: #D1FAE5;
-            color: #065F46;
-        }
+        /* --- INPUTS --- */
+        .cote-box { width: 55px; height: 35px; background: #000; border: 1px solid #1E293B; border-radius: 8px; color: var(--primary); text-align: center; font-family: 'JetBrains Mono'; font-weight: 700; }
+        .check-presence { width: 18px; height: 18px; accent-color: var(--success); cursor: pointer; }
+
+        /* --- JOURNAL --- */
+        .editor-area { width: 100%; background: #000; border: 1px solid #1E293B; border-radius: 15px; color: white; padding: 20px; font-family: inherit; margin-bottom: 15px; resize: none; }
     </style>
 </head>
 <body>
 
-    <div class="sidebar">
-        <h3>Scholarite</h3>
-        <p style="font-size: 12px; color: #94A3B8;">SESSION ENSEIGNANT</p>
-        <hr style="border: 0.5px solid #1E293B; margin: 20px 0;">
-        <div style="cursor:pointer;"><i class="fa-solid fa-book"></i> Mes Classes</div>
-        <div style="margin-top:20px; cursor:pointer; color: #94A3B8;"><i class="fa-solid fa-calendar-days"></i> Horaire</div>
-    </div>
-
-    <div class="main-content">
-        <div class="class-card">
-            <h2><i class="fa-solid fa-users"></i> Classe : 3ème Électricité</h2>
-            <p style="color: var(--slate)">Saisie des notes - Premier Trimestre</p>
+    <aside class="sidebar">
+        <div style="margin-bottom: 40px; display: flex; align-items: center; gap: 15px;">
+            <div style="width: 45px; height: 45px; background: var(--primary); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-weight: 900;">P</div>
+            <div><h2 style="font-size: 16px;">PLATINUM Prof</h2><small style="color: var(--success)">● En ligne</small></div>
         </div>
 
-        <table>
-            <thead>
-                <tr>
-                    <th>MATRICULE</th>
-                    <th>NOM DE L'ÉLÈVE</th>
-                    <th>INTERROGATION /20</th>
-                    <th>EXAMEN /40</th>
-                    <th>STATUT</th>
-                </tr>
-            </thead>
-            <tbody id="eleveTable">
-                <tr>
-                    <td>MAT-001</td>
-                    <td><strong>MUHINDO KOMBI</strong></td>
-                    <td><input type="number" class="note-input" value="15"></td>
-                    <td><input type="number" class="note-input" value="32"></td>
-                    <td><span class="status-badge">PRÊT</span></td>
-                </tr>
-                <tr>
-                    <td>MAT-002</td>
-                    <td><strong>KAVIRA MASIKA</strong></td>
-                    <td><input type="number" class="note-input" value="12"></td>
-                    <td><input type="number" class="note-input" value="28"></td>
-                    <td><span class="status-badge">PRÊT</span></td>
-                </tr>
-            </tbody>
-        </table>
+        <div class="nav-group">
+            <span class="nav-label">Académique</span>
+            <div class="nav-link active"><i class="fa-solid fa-graduation-cap"></i> Mes Classes</div>
+            <div class="nav-link"><i class="fa-solid fa-clipboard-list"></i> Évaluations</div>
+            <div class="nav-link"><i class="fa-solid fa-calendar-check"></i> Appel du jour</div>
+        </div>
 
-        <button class="btn-save" onclick="saveNotes()">
-            <i class="fa-solid fa-cloud-arrow-up"></i> ENREGISTRER LES NOTES
-        </button>
-    </div>
+        <div class="nav-group">
+            <span class="nav-label">Ressources</span>
+            <div class="nav-link"><i class="fa-solid fa-folder-open"></i> Supports de cours</div>
+            <div class="nav-link"><i class="fa-solid fa-message"></i> Messagerie</div>
+        </div>
+
+        <div style="margin-top: auto; background: var(--panel); padding: 20px; border-radius: 20px; border: 1px solid var(--accent);">
+            <h4 style="color: var(--accent); font-size: 12px;"><i class="fa-solid fa-triangle-exclamation"></i> Rappel Discipline</h4>
+            <p style="font-size: 11px; color: #94A3B8; margin-top: 8px;">3 élèves de votre classe sont en attente de régularisation financière.</p>
+        </div>
+    </aside>
+
+    <main class="main">
+        <div class="top-bar">
+            <div>
+                <h1 style="font-size: 28px; font-weight: 800;">Espace Pédagogique</h1>
+                <p style="color: #64748B;">Bienvenue, Prof. Kambale</p>
+            </div>
+            <div class="session-info">
+                <div class="info-pill">Periode<b>1ère Période</b></div>
+                <div class="info-pill">Matière<b>Électricité Industrielle</b></div>
+                <div class="info-pill">Local<b>Labo A1</b></div>
+            </div>
+        </div>
+
+        <div class="workspace-grid">
+            <section class="glass-card">
+                <div class="tabs">
+                    <div class="tab active" onclick="switchTab('notes')">Cotes & Évaluations</div>
+                    <div class="tab" onclick="switchTab('appel')">Appel & Présences</div>
+                    <div class="tab" onclick="switchTab('tp')">Suivi des TPs</div>
+                </div>
+
+                <div id="tab-content">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                        <h3 id="table-title">Registre des Points</h3>
+                        <button style="background: var(--primary); color: white; border: none; padding: 10px 20px; border-radius: 10px; font-weight: 700; cursor: pointer;">
+                            <i class="fa-solid fa-cloud-arrow-up"></i> Synchroniser
+                        </button>
+                    </div>
+                    
+                    <table>
+                        <thead>
+                            <tr id="table-head">
+                                <th>NOM DE L'ÉLÈVE</th>
+                                <th>INT 1 /10</th>
+                                <th>INT 2 /10</th>
+                                <th>TRAVAIL /20</th>
+                                <th>ACTION</th>
+                            </tr>
+                        </thead>
+                        <tbody id="student-data">
+                            </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <aside style="display: flex; flex-direction: column; gap: 25px;">
+                <div class="glass-card" style="padding: 20px;">
+                    <h3 style="font-size: 16px; margin-bottom: 15px;">Journal de Bord</h3>
+                    <label style="font-size: 11px; color: #64748B;">MATIÈRE ENSEIGNÉE</label>
+                    <textarea class="editor-area" placeholder="Détaillez le chapitre vu aujourd'hui..."></textarea>
+                    <div style="display: flex; gap: 10px;">
+                        <input type="checkbox" id="finish"> <label for="finish" style="font-size: 12px;">Chapitre terminé</label>
+                    </div>
+                    <button style="width: 100%; margin-top: 15px; padding: 12px; background: var(--accent); border: none; border-radius: 10px; color: white; font-weight: 800; cursor: pointer;">VALIDER LA SÉANCE</button>
+                </div>
+
+                <div class="glass-card" style="padding: 20px; border-color: var(--primary);">
+                    <h3 style="font-size: 16px; margin-bottom: 15px;">Horaire du Jour</h3>
+                    <div style="border-left: 2px solid var(--primary); padding-left: 15px; margin-bottom: 15px;">
+                        <p style="font-size: 12px; font-weight: 800;">08h00 - 10h00</p>
+                        <p style="font-size: 13px; color: #94A3B8;">3e Électricité - Labo</p>
+                    </div>
+                    <div style="border-left: 2px solid #1E293B; padding-left: 15px; opacity: 0.5;">
+                        <p style="font-size: 12px; font-weight: 800;">10h00 - 12h00</p>
+                        <p style="font-size: 13px; color: #94A3B8;">4e Mécanique - Théorie</p>
+                    </div>
+                </div>
+            </aside>
+        </div>
+    </main>
 
     <script>
-        // CONFIGURATION SUPABASE
-        const SUPABASE_URL = "https://chpydetdbfugwwhsvgin.supabase.co"; 
-        const SUPABASE_KEY = "Sb_publishable_G3rNGdnIihPNVfaLj1C4VQ_1TUBFh_z"; 
-        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        const students = [
+            { name: "KABAMBA Marc", status: "Présent", notes: [8, 7, 14] },
+            { name: "MUKENDI Alice", status: "Absent", notes: [9, 8, 18] },
+            { name: "TSHIMANGA David", status: "Présent", notes: [4, 5, 10] },
+            { name: "BAKULU Sarah", status: "Présent", notes: [10, 9, 19] }
+        ];
 
-        async function saveNotes() {
-            // Ici, nous ajouterons la logique pour envoyer les données vers la table 'notes'
-            alert("Connexion sécurisée établie. Les notes de la 3ème Électricité sont prêtes à être envoyées vers Supabase.");
+        function switchTab(mode) {
+            const tbody = document.getElementById('student-data');
+            const thead = document.getElementById('table-head');
+            const title = document.getElementById('table-title');
+            
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            event.target.classList.add('active');
+
+            if(mode === 'appel') {
+                title.innerText = "Feuille de Présence";
+                thead.innerHTML = "<th>NOM DE L'ÉLÈVE</th><th>STATUT</th><th>RETARD (MIN)</th><th>OBSERVATION</th>";
+                tbody.innerHTML = students.map(s => `
+                    <tr>
+                        <td><b>${s.name}</b></td>
+                        <td><input type="checkbox" class="check-presence" ${s.status === 'Présent' ? 'checked' : ''}></td>
+                        <td><input type="number" class="cote-box" style="width:70px" placeholder="0"></td>
+                        <td><input type="text" style="background:transparent; border:none; color:white;" placeholder="..."></td>
+                    </tr>
+                `).join('');
+            } else if(mode === 'notes') {
+                title.innerText = "Registre des Points";
+                thead.innerHTML = "<th>NOM DE L'ÉLÈVE</th><th>INT 1 /10</th><th>INT 2 /10</th><th>TRAVAIL /20</th><th>MOYENNE</th>";
+                tbody.innerHTML = students.map(s => `
+                    <tr>
+                        <td><b>${s.name}</b></td>
+                        <td><input type="number" class="cote-box" value="${s.notes[0]}"></td>
+                        <td><input type="number" class="cote-box" value="${s.notes[1]}"></td>
+                        <td><input type="number" class="cote-box" value="${s.notes[2]}"></td>
+                        <td style="font-weight:800; color:var(--success)">${((s.notes[0]+s.notes[1]+s.notes[2])/2).toFixed(1)}</td>
+                    </tr>
+                `).join('');
+            }
         }
+
+        window.onload = () => switchTab('notes');
     </script>
 </body>
 </html>
-
