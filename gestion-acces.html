@@ -2,203 +2,244 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Scholarite | Gestion des Accès</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Platinum Security | Centre de Contrôle des Accès</title>
+    
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=JetBrains+Mono&display=swap');
+
         :root {
-            --navy: #0F172A;
-            --gold: #B45309;
-            --slate: #64748B;
-            --bg: #F1F5F9;
-            --white: #FFFFFF;
+            --bg-ultra: #020617;
+            --card-glass: rgba(15, 23, 42, 0.9);
+            --accent-gold: #B45309;
+            --danger-red: #991B1B;
+            --safe-green: #059669;
+            --text-main: #F8FAFC;
+            --text-dim: #64748B;
         }
 
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: var(--bg);
-            margin: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: 'Inter', sans-serif; background: var(--bg-ultra); 
+            color: var(--text-main); display: flex; height: 100vh; overflow: hidden;
+            background-image: radial-gradient(circle at 100% 100%, #1e293b 0%, #020617 100%);
         }
 
-        .dashboard {
-            background: var(--white);
-            width: 950px;
-            height: 600px;
-            border-radius: 24px;
-            display: flex;
-            box-shadow: 0 40px 80px -20px rgba(0,0,0,0.2);
-            overflow: hidden;
+        /* --- SIDEBAR DE SÉCURITÉ --- */
+        .sidebar-auth { 
+            width: 280px; background: #000; border-right: 1px solid rgba(180, 83, 9, 0.2); 
+            display: flex; flex-direction: column; padding: 40px 20px;
         }
-
-        .sidebar {
-            width: 260px;
-            background: var(--navy);
-            padding: 30px 20px;
-            color: white;
-        }
-
-        .brand { font-size: 22px; font-weight: 800; margin-bottom: 40px; }
-
-        .main { flex-grow: 1; padding: 40px; display: flex; flex-direction: column; overflow-y: auto; }
-
-        .connection-status {
-            font-size: 12px;
-            margin-bottom: 20px;
-            font-weight: bold;
-        }
-
-        .status-online { color: #10B981; }
-
-        .gen-card {
-            background: #F8FAFC;
-            border: 1px solid #E2E8F0;
-            padding: 25px;
-            border-radius: 20px;
-            margin-bottom: 25px;
-        }
-
-        .form-row { display: flex; gap: 15px; }
-
-        input, select {
-            padding: 12px;
-            border: 1px solid #CBD5E1;
-            border-radius: 10px;
-            outline: none;
-        }
-
-        input { flex-grow: 1; }
-
-        .btn-gen {
-            background: var(--gold);
-            color: white;
-            border: none;
-            padding: 12px 25px;
-            border-radius: 10px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: 0.3s;
-        }
-
-        .btn-gen:hover { background: #92400E; }
-
-        .token-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 15px;
-            border-bottom: 1px solid #F1F5F9;
-            background: white;
-        }
+        .sidebar-auth h2 { font-size: 12px; letter-spacing: 3px; color: var(--accent-gold); margin-bottom: 50px; font-weight: 800; }
         
-        .token-code {
-            font-family: monospace;
-            background: #F1F5F9;
-            padding: 5px 10px;
-            border-radius: 5px;
-            font-weight: bold;
-            color: var(--navy);
+        .nav-item { 
+            padding: 18px 20px; border-radius: 12px; cursor: pointer; color: var(--text-dim); 
+            transition: 0.3s; display: flex; align-items: center; gap: 15px; margin-bottom: 10px;
+            font-size: 14px; font-weight: 600;
         }
+        .nav-item:hover, .nav-item.active { background: rgba(180, 83, 9, 0.1); color: #fff; }
+        .nav-item i { width: 20px; text-align: center; }
+
+        /* --- ZONE DE CONTENU --- */
+        .main-auth { flex-grow: 1; padding: 50px; overflow-y: auto; position: relative; }
+
+        /* --- MATRICE DES RÔLES --- */
+        .matrix-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 25px; }
+        .role-card { 
+            background: var(--card-glass); padding: 30px; border-radius: 24px; 
+            border: 1px solid rgba(255,255,255,0.05); transition: 0.4s;
+        }
+        .role-card:hover { border-color: var(--accent-gold); transform: translateY(-5px); }
+        .role-card h3 { font-size: 16px; margin-bottom: 15px; color: var(--accent-gold); text-transform: uppercase; }
+        .perm-item { font-size: 12px; color: var(--text-dim); margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
+        .perm-item i { color: var(--safe-green); }
+
+        /* --- INTERFACE CHAT DE REFOULEMENT --- */
+        .chat-layout {
+            display: flex; flex-direction: column; height: 100%;
+            background: #000; border-radius: 24px; border: 1px solid rgba(153, 27, 27, 0.4);
+            overflow: hidden; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+        .chat-header { 
+            padding: 25px; background: rgba(153, 27, 27, 0.05); border-bottom: 1px solid rgba(153, 27, 27, 0.2);
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .chat-messages { flex-grow: 1; padding: 25px; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; }
+        
+        .bubble {
+            max-width: 75%; padding: 15px 20px; border-radius: 15px; font-size: 14px; line-height: 1.5;
+            position: relative; animation: slideIn 0.3s ease;
+        }
+        .bubble.received { background: #1e293b; border-left: 4px solid var(--danger-red); align-self: flex-start; }
+        .bubble.sent { background: rgba(180, 83, 9, 0.15); border-right: 4px solid var(--accent-gold); align-self: flex-end; }
+        
+        .bubble-meta { font-size: 10px; color: var(--text-dim); margin-bottom: 5px; text-transform: uppercase; }
+
+        .chat-input-area { 
+            padding: 25px; background: #0a0f1d; border-top: 1px solid rgba(255,255,255,0.05); 
+            display: flex; gap: 15px; 
+        }
+        .chat-input-area input { 
+            flex-grow: 1; background: #000; border: 1px solid #1e293b; color: white; 
+            padding: 15px; border-radius: 12px; font-family: 'JetBrains Mono', monospace;
+        }
+        .btn-send { 
+            background: var(--accent-gold); border: none; color: white; 
+            padding: 0 25px; border-radius: 12px; cursor: pointer; font-weight: 800;
+        }
+
+        /* --- ANIMATIONS --- */
+        @keyframes slideIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .pulse-red { animation: pulse 2s infinite; }
+        @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(153, 27, 27, 0.4); } 70% { box-shadow: 0 0 0 10px rgba(153, 27, 27, 0); } 100% { box-shadow: 0 0 0 0 rgba(153, 27, 27, 0); } }
     </style>
 </head>
+
 <body>
-
-    <div class="dashboard">
-        <div class="sidebar">
-            <div class="brand"><i class="fa-solid fa-graduation-cap"></i> Scholarite</div>
-            <p style="font-size: 12px; color: #94A3B8;">CONSOLE D'ADMINISTRATION</p>
+    <aside class="sidebar-auth">
+        <h2>PLATINUM ACCESS</h2>
+        <div class="nav-item active" onclick="switchView('matrix', this)"><i class="fa-solid fa-key"></i> Matrice des Rôles</div>
+        <div class="nav-item" onclick="switchView('users', this)"><i class="fa-solid fa-users"></i> Comptes Actifs</div>
+        <div class="nav-item pulse-red" onclick="switchView('refoulement', this)" id="nav-chat">
+            <i class="fa-solid fa-comments-dollar"></i> Chat Refoulement
+            <span id="badge-count" style="display:none; background:red; font-size:10px; padding:2px 6px; border-radius:10px; margin-left:10px">NEW</span>
         </div>
+        <div class="nav-item" onclick="switchView('audit', this)"><i class="fa-solid fa-fingerprint"></i> Journal d'Audit</div>
+    </aside>
 
-        <div class="main">
-            <div class="connection-status">
-                <i class="fa-solid fa-circle status-online"></i> Système Connecté au Cloud
-            </div>
-
-            <div class="gen-card">
-                <h3>Générer un Jeton d'Accès</h3>
-                <div class="form-row">
-                    <select id="roleSelect">
-                        <option value="PROF">PROFESSEUR</option>
-                        <option value="COMPTABLE">COMPTABLE</option>
-                    </select>
-                    <input type="text" id="nameInput" placeholder="Nom du destinataire">
-                    <button class="btn-gen" id="genBtn" onclick="saveTokenToDatabase()">CRÉER L'ACCÈS</button>
+    <main class="main-auth">
+        <section id="view-matrix" class="view-panel">
+            <h1 style="font-size: 30px; margin-bottom: 40px;">Privilèges & Sécurité</h1>
+            <div class="matrix-grid">
+                <div class="role-card">
+                    <h3>Promoteur</h3>
+                    <div class="perm-item"><i class="fa-solid fa-check"></i> Contrôle Total Supabase</div>
+                    <div class="perm-item"><i class="fa-solid fa-check"></i> Audit des Transactions</div>
+                    <div class="perm-item"><i class="fa-solid fa-check"></i> Gestion des Identifiants</div>
+                </div>
+                <div class="role-card">
+                    <h3>Directeur des Études</h3>
+                    <div class="perm-item"><i class="fa-solid fa-check"></i> Journaux de Matières</div>
+                    <div class="perm-item"><i class="fa-solid fa-check"></i> Bilans d'Absences Profs</div>
+                    <div class="perm-item"><i class="fa-solid fa-check"></i> Profils Complets Élèves</div>
+                </div>
+                <div class="role-card">
+                    <h3>Directeur Discipline</h3>
+                    <div class="perm-item"><i class="fa-solid fa-check"></i> Réception Listes Refoulement</div>
+                    <div class="perm-item"><i class="fa-solid fa-check"></i> Saisie des Conduites</div>
+                    <div class="perm-item"><i class="fa-solid fa-check"></i> Chat Interne Urgent</div>
+                </div>
+                <div class="role-card">
+                    <h3>Comptable</h3>
+                    <div class="perm-item"><i class="fa-solid fa-check"></i> Gestion des Encaissements</div>
+                    <div class="perm-item"><i class="fa-solid fa-check"></i> Signalement Insolvables</div>
+                    <div class="perm-item"><i class="fa-solid fa-check"></i> Rapport de Trésorerie</div>
                 </div>
             </div>
+        </section>
 
-            <div id="tokenList">
-                <p style="text-align: center; color: #94A3B8;">Chargement des accès...</p>
+        <section id="view-refoulement" class="view-panel" style="display:none; height:100%">
+            <div class="chat-layout">
+                <div class="chat-header">
+                    <div>
+                        <h3 style="color:var(--danger-red)">CANAL DE REFOULEMENT</h3>
+                        <p style="font-size:11px; color:var(--text-dim)">Liaison directe : Comptabilité ⇄ Discipline</p>
+                    </div>
+                    <div style="text-align:right">
+                        <span class="status-badge" style="background:var(--safe-green); color:white; padding:5px 12px; border-radius:20px; font-size:10px">EN LIGNE</span>
+                    </div>
+                </div>
+                
+                <div class="chat-messages" id="messages-container">
+                    </div>
+
+                <div class="chat-input-area">
+                    <input type="text" id="msg-input" placeholder="Matricule de l'élève ou instruction...">
+                    <button class="btn-send" onclick="sendChatMessage()">ENVOYER</button>
+                </div>
             </div>
-        </div>
-    </div>
+        </section>
+    </main>
 
     <script>
-        // CONFIGURATION SUPABASE (Déjà remplie avec tes clés)
+        // --- CONFIGURATION SUPABASE ---
         const SUPABASE_URL = "https://chpydetdbfugwwhsvgin.supabase.co"; 
-        const SUPABASE_KEY = "Sb_publishable_G3rNGdnIihPNVfaLj1C4VQ_1TUBFh_z"; 
+        const SUPABASE_KEY = "sb_publishable_G3rNGdnIihPNVfaLj1C4VQ_1TUBFh_z"; 
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        // --- NAVIGATION ---
+        function switchView(id, el) {
+            document.querySelectorAll('.view-panel').forEach(v => v.style.display = 'none');
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            
+            document.getElementById('view-' + id).style.display = (id === 'refoulement') ? 'flex' : 'block';
+            el.classList.add('active');
 
-        // Fonction pour générer un code aléatoire
-        function generateRandomCode() {
-            return 'SCH-' + Math.random().toString(36).substring(2, 8).toUpperCase();
-        }
-
-        // ENREGISTREMENT DANS SUPABASE
-        async function saveTokenToDatabase() {
-            const name = document.getElementById('nameInput').value;
-            const role = document.getElementById('roleSelect').value;
-            const btn = document.getElementById('genBtn');
-
-            if(!name) return alert("Veuillez saisir un nom.");
-
-            btn.disabled = true;
-            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>...';
-
-            const newCode = generateRandomCode();
-
-            const { error } = await supabase
-                .from('jetons_acces')
-                .insert([{ code_jeton: newCode, module_cible: role, nom_destinataire: name, statut: 'DISPONIBLE' }]);
-
-            if (error) {
-                alert("Erreur : " + error.message);
-            } else {
-                document.getElementById('nameInput').value = "";
-                fetchTokens(); 
+            if(id === 'refoulement') {
+                document.getElementById('badge-count').style.display = 'none';
+                loadChatHistory();
+                subscribeToChat(); // Activation du temps réel
             }
-            btn.disabled = false;
-            btn.innerHTML = "CRÉER L'ACCÈS";
         }
 
-        // RÉCUPÉRATION DES JETONS
-        async function fetchTokens() {
-            const { data } = await supabase
-                .from('jetons_acces')
+        // --- LOGIQUE CHAT TEMPS RÉEL ---
+        async function loadChatHistory() {
+            const { data, error } = await supabase
+                .from('chat_refoulement')
                 .select('*')
-                .order('cree_at', { ascending: false });
-
+                .order('created_at', { ascending: true })
+                .limit(50);
+            
             if (data) {
-                const list = document.getElementById('tokenList');
-                list.innerHTML = "<h4>Accès Actifs</h4>";
-                data.forEach(token => {
-                    const div = document.createElement('div');
-                    div.className = 'token-item';
-                    div.innerHTML = `
-                        <div><strong>${token.nom_destinataire}</strong> <small>(${token.module_cible})</small></div>
-                        <div class="token-code">${token.code_jeton}</div>
-                    `;
-                    list.appendChild(div);
-                });
+                const container = document.getElementById('messages-container');
+                container.innerHTML = "";
+                data.forEach(msg => appendBubble(msg.sender, msg.content, msg.type));
             }
         }
 
-        // Lancer la récupération au démarrage
-        fetchTokens();
+        async function sendChatMessage() {
+            const input = document.getElementById('msg-input');
+            const content = input.value.trim();
+            if(!content) return;
+
+            // Ici, nous simulons l'envoi. Pour un vrai système, on fait un .insert() dans Supabase
+            appendBubble("MOI (Comptable)", content, "sent");
+            input.value = "";
+
+            // Simulation d'une alerte reçue par le Directeur de Discipline après 2s
+            setTimeout(() => {
+                receiveAlert("SYSTEME", "ALERTE : L'élève MAT-990 est insolvable. Veuillez procéder au refoulement.");
+            }, 2000);
+        }
+
+        function appendBubble(sender, text, type) {
+            const container = document.getElementById('messages-container');
+            const time = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+            
+            const div = document.createElement('div');
+            div.className = `bubble ${type}`;
+            div.innerHTML = `
+                <div class="bubble-meta">${sender} • ${time}</div>
+                <div>${text}</div>
+            `;
+            container.appendChild(div);
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function receiveAlert(sender, text) {
+            appendBubble(sender, text, "received");
+            document.getElementById('badge-count').style.display = 'inline';
+            // Jouer un son d'alerte
+            new Audio('https://www.soundjay.com/buttons/beep-07.mp3').play();
+        }
+
+        // --- SÉCURITÉ : AUDIT INITIAL ---
+        window.onload = () => {
+            console.log("PLATINUM_AUTH_SERVICE: Initialisé avec succès.");
+        };
     </script>
 </body>
 </html>
-
