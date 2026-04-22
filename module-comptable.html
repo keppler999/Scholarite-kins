@@ -24,17 +24,18 @@
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Inter', sans-serif; background: var(--bg); color: white; display: flex; height: 100vh; overflow: hidden; }
 
-        /* --- SIDEBAR DYNAMIQUE --- */
+        /* --- SIDEBAR --- */
         .sidebar {
             width: 280px; background: #000; border-right: 1px solid var(--border);
             padding: 30px; display: flex; flex-direction: column;
         }
         .brand { display: flex; align-items: center; gap: 12px; margin-bottom: 40px; }
-        .logo-box { width: 45px; height: 45px; border-radius: 12px; background: var(--panel); object-fit: contain; }
+        .logo-box { width: 45px; height: 45px; border-radius: 12px; background: var(--panel); object-fit: contain; border: 1px solid var(--gold); }
 
         .nav-link {
             padding: 15px; border-radius: 12px; color: #64748B; cursor: pointer;
             display: flex; align-items: center; gap: 15px; transition: 0.3s; margin-bottom: 8px;
+            font-size: 13px; font-weight: 600;
         }
         .nav-link.active, .nav-link:hover { background: rgba(180, 83, 9, 0.1); color: var(--gold); }
 
@@ -47,23 +48,23 @@
         .kpi-card small { color: #64748B; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; }
         .kpi-card h2 { font-family: 'JetBrains Mono'; margin-top: 10px; font-size: 22px; }
 
-        /* --- TABLEAU DES OPÉRATIONS --- */
+        /* --- TABLEAU --- */
         .workspace { background: var(--panel); border-radius: 24px; padding: 30px; border: 1px solid var(--border); }
         .search-bar { width: 100%; background: #000; border: 1px solid #1E293B; padding: 15px; border-radius: 12px; color: white; margin-bottom: 25px; }
 
         table { width: 100%; border-collapse: collapse; }
-        th { text-align: left; padding: 15px; color: #64748B; font-size: 12px; border-bottom: 1px solid var(--border); }
+        th { text-align: left; padding: 15px; color: #64748B; font-size: 11px; text-transform: uppercase; border-bottom: 1px solid var(--border); }
         td { padding: 18px 15px; border-bottom: 1px solid rgba(255,255,255,0.02); font-size: 14px; }
 
         /* --- ACTIONS --- */
-        .btn { padding: 8px 15px; border-radius: 8px; cursor: pointer; border: none; font-weight: 700; font-size: 12px; transition: 0.2s; }
+        .btn { padding: 8px 15px; border-radius: 8px; cursor: pointer; border: none; font-weight: 700; font-size: 11px; transition: 0.2s; }
         .btn-pay { background: var(--success); color: white; }
         .btn-kick { background: var(--danger); color: white; margin-left: 5px; }
         .btn-pdf { background: #1E293B; color: white; margin-right: 5px; }
 
-        /* --- MODAL PAIEMENT --- */
-        .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(8px); display: none; justify-content: center; align-items: center; z-index: 1000; }
-        .modal { background: var(--panel); padding: 40px; border-radius: 28px; width: 450px; border: 1px solid var(--gold); }
+        /* --- MODAL --- */
+        .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(10px); display: none; justify-content: center; align-items: center; z-index: 1000; }
+        .modal { background: var(--panel); padding: 40px; border-radius: 28px; width: 450px; border: 1px solid rgba(180, 83, 9, 0.4); }
     </style>
 </head>
 <body>
@@ -77,159 +78,178 @@
             </div>
         </div>
         <div class="nav-link active"><i class="fa-solid fa-cash-register"></i> Caisse Directe</div>
-        <div class="nav-link"><i class="fa-solid fa-list-check"></i> État des Tranches</div>
-        <div class="nav-link"><i class="fa-solid fa-building-columns"></i> Dépenses École</div>
-        <div class="nav-link"><i class="fa-solid fa-file-pdf"></i> Rapports de Clôture</div>
+        <div class="nav-link"><i class="fa-solid fa-list-check"></i> Recouvrement</div>
+        <div class="nav-link"><i class="fa-solid fa-file-pdf"></i> Rapports Journaliers</div>
+        <div class="nav-link" style="margin-top: auto; color: var(--danger);" onclick="window.location.href='index.html'"><i class="fa-solid fa-power-off"></i> Déconnexion</div>
     </aside>
 
     <main class="content">
         <div class="kpi-grid">
-            <div class="kpi-card"><small>Encaissement Jour</small><h2 id="day-cash">0.00 $</h2></div>
-            <div class="kpi-card"><small>Total Recouvré</small><h2 id="total-cash">0.00 $</h2></div>
-            <div class="kpi-card"><small>Taux de Solvabilité</small><h2 id="rate-cash">0%</h2></div>
-            <div class="kpi-card"><small>Élèves à Refouler</small><h2 id="kick-count" style="color: var(--danger)">0</h2></div>
+            <div class="kpi-card"><small>Caisse du Jour</small><h2 id="day-cash">0.00 $</h2></div>
+            <div class="kpi-card"><small>Encaissement Total</small><h2 id="total-cash">0.00 $</h2></div>
+            <div class="kpi-card"><small>Solvabilité Globale</small><h2 id="rate-cash">0%</h2></div>
+            <div class="kpi-card"><small>Alertes Refoulement</small><h2 id="kick-count" style="color: var(--danger)">0</h2></div>
         </div>
 
         <div class="workspace">
-            <input type="text" class="search-bar" placeholder="Scanner matricule ou nom de l'élève...">
+            <input type="text" class="search-bar" placeholder="Rechercher un élève (Nom ou Matricule)..." onkeyup="filterTable(this.value)">
             <table>
                 <thead>
                     <tr>
                         <th>NOM DE L'ÉLÈVE</th>
-                        <th>CLASSE</th>
-                        <th>SOLDE PAYÉ</th>
-                        <th>RESTE</th>
+                        <th>OPTION / CLASSE</th>
+                        <th>TOTAL PAYÉ</th>
+                        <th>RESTE À PAYER</th>
                         <th>STATUS</th>
                         <th>ACTIONS</th>
                     </tr>
                 </thead>
-                <tbody id="registry">
-                    </tbody>
+                <tbody id="registry"></tbody>
             </table>
         </div>
     </main>
 
     <div class="overlay" id="pay-modal">
         <div class="modal">
-            <h2 style="margin-bottom: 10px;">Enregistrer un Versement</h2>
-            <p id="target-student" style="color: var(--gold); margin-bottom: 30px; font-weight: 800;"></p>
+            <h2 style="margin-bottom: 10px; font-weight: 800;">ENCAISSEMENT</h2>
+            <p id="target-student" style="color: var(--gold); margin-bottom: 30px; font-weight: 600; font-size: 18px;"></p>
             
-            <div style="margin-bottom: 20px;">
-                <label style="font-size: 11px; color: #64748B;">MONTANT VERSE (USD)</label>
-                <input type="number" id="cash-in" style="width:100%; padding:15px; background:#000; border:1px solid #1E293B; color:white; border-radius:12px; margin-top:10px; font-size:20px;">
+            <div style="margin-bottom: 25px;">
+                <label style="font-size: 11px; color: #64748B;">MONTANT DU VERSEMENT (USD)</label>
+                <input type="number" id="cash-in" placeholder="0.00" style="width:100%; padding:18px; background:#000; border:1px solid #1E293B; color:white; border-radius:12px; margin-top:10px; font-size:24px; font-family:'JetBrains Mono';">
             </div>
 
-            <div style="display: flex; gap: 10px;">
-                <button class="btn-pay" style="flex-grow: 1; padding: 15px;" onclick="processPayment()">VALIDER & GÉNÉRER REÇU</button>
-                <button class="btn" style="background:#1E293B; color:white;" onclick="closeModal()">ANNULER</button>
+            <div style="display: flex; gap: 12px;">
+                <button class="btn-pay" style="flex-grow: 1; padding: 18px; font-size: 14px;" onclick="processPayment()">CONFIRMER LE PAIEMENT</button>
+                <button class="btn" style="background:#1E293B; color:white; padding: 18px;" onclick="closeModal()">ANNULER</button>
             </div>
         </div>
     </div>
 
     <script>
-        // --- DONNÉES GLOBALES ---
-        let currentConfig = JSON.parse(localStorage.getItem('platinum_config')) || {};
+        // --- INITIALISATION ---
+        const config = JSON.parse(localStorage.getItem('platinum_config')) || { schoolName: "Scholarite", totalFees: 450 };
         let activeStudent = null;
 
-        const students = [
-            { id: 1, name: "KABAMBA Marc", class: "3e Électricité", paid: 150, total: 450 },
-            { id: 2, name: "MUKENDI Alice", class: "3e Électricité", paid: 450, total: 450 },
-            { id: 3, name: "TSHIMANGA David", class: "4e Commerciale", paid: 50, total: 450 }
+        // Simulation de données (À lier à ta table 'students' Supabase)
+        let students = [
+            { id: 1, name: "KABAMBA Marc", class: "3e Électricité", paid: 150, total: config.totalFees },
+            { id: 2, name: "MUKENDI Alice", class: "3e Électricité", paid: 450, total: config.totalFees },
+            { id: 3, name: "TSHIMANGA David", class: "4e Commerciale", paid: 50, total: config.totalFees }
         ];
 
-        // --- INITIALISATION ---
         window.onload = () => {
-            document.getElementById('side-logo').src = currentConfig.logo || '';
-            document.getElementById('side-sch-name').innerText = (currentConfig.schoolName || 'PLATINUM').toUpperCase();
+            document.getElementById('side-logo').src = config.logo || '';
+            document.getElementById('side-sch-name').innerText = config.schoolName.toUpperCase();
             renderRegistry();
             updateKPIs();
         };
 
-        function renderRegistry() {
+        // --- FONCTIONS CORE ---
+        function renderRegistry(data = students) {
             const tbody = document.getElementById('registry');
-            tbody.innerHTML = students.map(s => {
+            tbody.innerHTML = data.map(s => {
                 const rest = s.total - s.paid;
-                const status = rest <= 0 ? '<span style="color:var(--success)">SOLVABLE</span>' : '<span style="color:var(--danger)">DETTE</span>';
+                const status = rest <= 0 
+                    ? '<span style="background:rgba(16,185,129,0.1); color:var(--success); padding:4px 8px; border-radius:6px; font-size:11px; font-weight:800;">SOLVABLE</span>' 
+                    : '<span style="background:rgba(239,68,68,0.1); color:var(--danger); padding:4px 8px; border-radius:6px; font-size:11px; font-weight:800;">EN DETTE</span>';
+                
                 return `
                     <tr>
-                        <td><b>${s.name}</b></td>
-                        <td>${s.class}</td>
-                        <td>${s.paid}.00 $</td>
-                        <td>${rest}.00 $</td>
+                        <td><b style="letter-spacing:0.5px">${s.name}</b></td>
+                        <td style="color:#64748B">${s.class}</td>
+                        <td style="font-family:'JetBrains Mono'">${s.paid.toFixed(2)} $</td>
+                        <td style="font-family:'JetBrains Mono'; color:${rest > 0 ? 'var(--danger)' : 'white'}">${rest.toFixed(2)} $</td>
                         <td>${status}</td>
                         <td>
-                            <button class="btn btn-pdf" onclick="generateReceipt('${s.name}', 0, true)">📜</button>
-                            <button class="btn btn-pay" onclick="openPay('${s.name}', ${s.id})">PAYER</button>
-                            <button class="btn btn-kick" onclick="triggerKick('${s.name}')">REFOULEMENT</button>
+                            <button class="btn btn-pdf" title="Réimprimer Reçu" onclick="generateReceipt('${s.name}', 0, true)">📜</button>
+                            <button class="btn btn-pay" onclick="openPay(${s.id})">PAYER</button>
+                            <button class="btn btn-kick" title="Alerte Refoulement" onclick="triggerKick('${s.name}')"><i class="fa-solid fa-user-slash"></i></button>
                         </td>
                     </tr>
                 `;
             }).join('');
         }
 
-        // --- LOGIQUE PDF (GÉNÉRATION DE REÇU) ---
-        function generateReceipt(studentName, amount, isDuplicate = false) {
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF();
-            const date = new Date().toLocaleString();
-
-            // Design du reçu
-            doc.setFillColor(18, 23, 42); 
-            doc.rect(0, 0, 210, 40, 'F');
-            
-            doc.setTextColor(180, 83, 9);
-            doc.setFontSize(22);
-            doc.text(currentConfig.schoolName || "PLATINUM ERP", 20, 25);
-            
-            doc.setTextColor(0, 0, 0);
-            doc.setFontSize(16);
-            doc.text("REÇU DE PAIEMENT N°" + Math.floor(Math.random()*10000), 20, 60);
-            
-            doc.setFontSize(12);
-            doc.text(`Date: ${date}`, 20, 75);
-            doc.text(`Élève: ${studentName}`, 20, 90);
-            doc.text(`Montant versé: ${amount} $`, 20, 105);
-            
-            doc.setDrawColor(180, 83, 9);
-            doc.line(20, 120, 190, 120);
-            
-            doc.setFontSize(10);
-            doc.text("Signature Comptabilité", 150, 150);
-            doc.text("Cachet de l'École", 20, 150);
-
-            doc.save(`Recu_${studentName.replace(' ', '_')}.pdf`);
+        function filterTable(val) {
+            const filtered = students.filter(s => s.name.toLowerCase().includes(val.toLowerCase()));
+            renderRegistry(filtered);
         }
 
-        // --- ACTIONS ---
-        function openPay(name, id) {
+        // --- LOGIQUE PAIEMENT ---
+        function openPay(id) {
             activeStudent = students.find(s => s.id === id);
-            document.getElementById('target-student').innerText = name;
+            document.getElementById('target-student').innerText = activeStudent.name;
             document.getElementById('pay-modal').style.display = 'flex';
         }
 
         function processPayment() {
-            const val = parseFloat(document.getElementById('cash-in').value);
-            if(!val) return;
+            const amount = parseFloat(document.getElementById('cash-in').value);
+            if(!amount || amount <= 0) return alert("Veuillez saisir un montant valide.");
             
-            activeStudent.paid += val;
-            generateReceipt(activeStudent.name, val);
+            activeStudent.paid += amount;
+            generateReceipt(activeStudent.name, amount);
+            
+            // Notification visuelle
+            alert(`Paiement de ${amount}$ enregistré. Le reçu PDF a été généré.`);
+            
             closeModal();
             renderRegistry();
             updateKPIs();
+            document.getElementById('cash-in').value = "";
+        }
+
+        // --- GÉNÉRATION DU REÇU PDF ---
+        function generateReceipt(studentName, amount, isDuplicate = false) {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF({ format: [100, 150] }); // Format ticket
+            const date = new Date().toLocaleString('fr-FR');
+
+            // Header
+            doc.setFillColor(15, 23, 42); 
+            doc.rect(0, 0, 100, 30, 'F');
+            
+            doc.setTextColor(180, 83, 9);
+            doc.setFontSize(14);
+            doc.text(config.schoolName || "SCHOLARITE", 50, 15, { align: "center" });
+            doc.setFontSize(8);
+            doc.text(config.slogan || "L'excellence par le travail", 50, 22, { align: "center" });
+            
+            // Corps
+            doc.setTextColor(0, 0, 0);
+            doc.setFontSize(10);
+            doc.text(isDuplicate ? "DUPLICATA DE REÇU" : "REÇU DE PAIEMENT OFFICIEL", 50, 45, { align: "center" });
+            
+            doc.setFontSize(8);
+            doc.text(`Date : ${date}`, 10, 60);
+            doc.setFontSize(10);
+            doc.text(`ÉLÈVE : ${studentName}`, 10, 75);
+            doc.text(`MONTANT : ${amount.toFixed(2)} USD`, 10, 85);
+            doc.text(`LIBELLÉ : Frais Scolaires 2026`, 10, 95);
+            
+            doc.setDrawColor(200, 200, 200);
+            doc.line(10, 110, 90, 110);
+            
+            doc.setFontSize(7);
+            doc.text("Le comptable a reçu le montant susmentionné.", 50, 125, { align: "center" });
+            doc.setFontSize(9);
+            doc.text("CACHET DE L'ÉTABLISSEMENT", 50, 140, { align: "center" });
+
+            doc.save(`Recu_${studentName.replace(/\s/g, '_')}.pdf`);
         }
 
         function triggerKick(name) {
-            // Lien direct avec le module de discipline (via localStorage pour la démo)
-            let kicks = JSON.parse(localStorage.getItem('kick_list')) || [];
-            kicks.push({ name, time: new Date().toLocaleTimeString() });
-            localStorage.setItem('kick_list', JSON.stringify(kicks));
-            alert(`Alerte de refoulement envoyée pour ${name}`);
+            // Simulation d'envoi vers le module Sécurité/Discipline
+            console.log(`ALERTE : Refoulement requis pour ${name}`);
+            alert(`Alerte envoyée au Directeur de Discipline pour ${name}.`);
         }
 
         function updateKPIs() {
-            const total = students.reduce((acc, curr) => acc + curr.paid, 0);
-            document.getElementById('total-cash').innerText = total + ".00 $";
-            document.getElementById('rate-cash').innerText = Math.round((total / (students.length * 450)) * 100) + "%";
+            const totalRecouvre = students.reduce((acc, s) => acc + s.paid, 0);
+            const totalAttendu = students.length * config.totalFees;
+            
+            document.getElementById('total-cash').innerText = totalRecouvre.toFixed(2) + " $";
+            document.getElementById('rate-cash').innerText = Math.round((totalRecouvre / totalAttendu) * 100) + "%";
             document.getElementById('kick-count').innerText = students.filter(s => (s.total - s.paid) > 0).length;
         }
 
