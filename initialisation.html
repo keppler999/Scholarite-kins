@@ -76,7 +76,6 @@
             padding: 14px; border-radius: 12px; color: white; margin-bottom: 15px;
         }
 
-        /* LOGO UPLOAD STYLING */
         .logo-upload-box {
             border: 2px dashed #1E293B; border-radius: 15px;
             padding: 20px; text-align: center; cursor: pointer;
@@ -112,7 +111,6 @@
             <div class="pane active" id="p1">
                 <h1>Identité Visuelle</h1>
                 <p style="color:var(--text-dim); margin-bottom:30px">Importez le logo et définissez les couleurs de l'école.</p>
-                
                 <div class="form-card">
                     <label>Logo de l'Établissement</label>
                     <div class="logo-upload-box" onclick="document.getElementById('logo-input').click()">
@@ -121,12 +119,10 @@
                         <img id="logo-preview" src="#" alt="Logo Preview">
                         <input type="file" id="logo-input" hidden accept="image/*" onchange="previewLogo(this)">
                     </div>
-
                     <div style="margin-top:20px">
                         <label>Nom de l'École</label>
                         <input type="text" id="sch_name" placeholder="ex: C.S. Maranatha">
                     </div>
-
                     <div style="display:grid; grid-template-columns:1fr 1fr; gap:15px">
                         <div>
                             <label>Couleur Principale</label>
@@ -181,14 +177,18 @@
                 <i class="fa-solid fa-circle-check" style="font-size:60px; color:var(--gold); margin-bottom:20px"></i>
                 <h1>Prêt pour le déploiement</h1>
                 <p style="color:var(--text-dim); margin-bottom:30px">Vérifiez vos informations avant de lancer l'ERP.</p>
-                <div id="final_summary" style="text-align:left; background:#000; padding:25px; border-radius:15px; font-size:13px; line-height:1.6">
-                    </div>
-                <button class="btn-next" onclick="finalize()" style="width:100%; margin-top:20px">INSTALLER LE SYSTÈME PLATINUM</button>
+                <div id="final_summary" style="text-align:left; background:#000; padding:25px; border-radius:15px; font-size:13px; line-height:1.6"></div>
+                <button class="btn-next" id="btn-finalize" onclick="finalize()" style="width:100%; margin-top:20px">INSTALLER LE SYSTÈME PLATINUM</button>
             </div>
         </main>
     </div>
 
     <script>
+        // CONFIGURATION SUPABASE
+        const SUPABASE_URL = "https://chpydetdbfugwwhsvgin.supabase.co"; 
+        const SUPABASE_KEY = "sb_publishable_G3rNGdnIihPNVfaLj1C4VQ_1TUBFh_z"; 
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
         let options = ["Électricité", "Mécanique"];
         let logoData = null;
 
@@ -204,7 +204,7 @@
                     preview.style.display = 'block';
                     icon.style.display = 'none';
                     text.style.display = 'none';
-                    logoData = e.target.result; // Stockage en base64
+                    logoData = e.target.result; 
                 }
                 reader.readAsDataURL(input.files[0]);
             }
@@ -215,7 +215,6 @@
             document.querySelectorAll('.step-link').forEach(l => l.classList.remove('active'));
             document.getElementById('p' + step).classList.add('active');
             document.getElementById('l' + step).classList.add('active');
-
             if(step === 4) showSummary();
         }
 
@@ -237,7 +236,7 @@
             
             document.getElementById('final_summary').innerHTML = `
                 <div style="display:flex; align-items:center; gap:15px; margin-bottom:15px">
-                    <img src="${logoData || ''}" style="width:50px; height:50px; background:#1e293b; border-radius:5px; object-fit:contain">
+                    <img src="${logoData || ''}" style="width:50px; height:50px; background:#1e293b; border-radius:5px; object-fit:contain; border: 1px solid #334155">
                     <h2 style="margin:0; font-size:18px">${name}</h2>
                 </div>
                 <hr style="border:0; border-top:1px solid #1e293b; margin-bottom:15px">
@@ -247,27 +246,56 @@
             `;
         }
 
-        function finalize() {
-            const btn = document.querySelector('#p4 .btn-next');
+        async function finalize() {
+            const btn = document.getElementById('btn-finalize');
             btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Déploiement en cours...';
-            
-            // Sauvegarde locale pour utilisation dans tout le logiciel
-            const config = {
-                schoolName: document.getElementById('sch_name').value,
-                logo: logoData,
-                theme: document.getElementById('sch_color').value,
-                options: options
-            };
-            localStorage.setItem('platinum_config', JSON.stringify(config));
+            btn.disabled = true;
 
-            setTimeout(() => {
-                alert("Système configuré avec succès ! Redirection...");
-                window.location.href = "index.html";
-            }, 2500);
+            const configData = {
+                school_name: document.getElementById('sch_name').value || "Ma Nouvelle École",
+                logo_url: logoData,
+                primary_color: document.getElementById('sch_color').value,
+                slogan: document.getElementById('sch_slogan').value,
+                total_fees: parseFloat(document.getElementById('f_total').value),
+                payment_installments: parseInt(document.getElementById('f_tranches').value)
+            };
+
+            try {
+                // 1. Mise à jour de la configuration (ID 1 fixé par le SQL)
+                const { error: configError } = await supabase
+                    .from('school_config')
+                    .update(configData)
+                    .eq('id', 1);
+
+                if (configError) throw configError;
+
+                // 2. Insertion des options
+                const optionsToInsert = options.map(opt => ({ name: opt }));
+                const { error: optError } = await supabase
+                    .from('school_options')
+                    .upsert(optionsToInsert, { onConflict: 'name' });
+
+                if (optError) throw optError;
+
+                // 3. Sauvegarde locale pour fallback rapide
+                localStorage.setItem('platinum_config', JSON.stringify(configData));
+
+                btn.style.background = "#059669";
+                btn.innerHTML = '<i class="fa-solid fa-check"></i> SYSTÈME INSTALLÉ';
+                
+                setTimeout(() => {
+                    window.location.href = "index.html";
+                }, 2000);
+
+            } catch (err) {
+                console.error(err);
+                alert("Erreur lors de l'installation : " + err.message);
+                btn.innerHTML = "RÉESSAYER L'INSTALLATION";
+                btn.disabled = false;
+            }
         }
 
         renderOpts();
     </script>
 </body>
 </html>
-
