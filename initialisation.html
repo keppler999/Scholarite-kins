@@ -1,129 +1,218 @@
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Scholarite | Fondation du Système</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <style>
-        :root {
-            --navy: #0F172A;
-            --gold: #B45309;
-            --slate: #64748B;
-            --bg: #F8FAFC;
-            --white: #FFFFFF;
-            --border: #E2E8F0;
-        }
+<style>
+    :root {
+        --gold: #B45309;
+        --bg-panel: #0F172A;
+    }
 
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: var(--bg);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-        }
+    body {
+        font-family: 'Inter', sans-serif;
+        background: #020617;
+        color: #F8FAFC;
+        margin: 0;
+        display: flex;
+        justify-content: center;
+        padding: 40px 20px;
+    }
 
-        .init-card {
-            background: var(--white);
-            padding: 40px;
-            border-radius: 24px;
-            box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.15);
-            width: 100%;
-            max-width: 450px;
-            border-top: 10px solid var(--navy);
-        }
+    .setup-wizard {
+        width: 100%;
+        max-width: 900px;
+        background: var(--bg-panel);
+        border: 1px solid rgba(180, 83, 9, 0.2);
+        border-radius: 30px;
+        overflow: hidden;
+        display: flex;
+        box-shadow: 0 50px 100px rgba(0,0,0,0.8);
+    }
 
-        .logo-area {
-            text-align: center;
-            margin-bottom: 30px;
-        }
+    /* Barre Latérale de Progression */
+    .setup-sidebar {
+        width: 250px;
+        background: #000;
+        padding: 40px 20px;
+        border-right: 1px solid rgba(255,255,255,0.05);
+    }
 
-        .logo-icon {
-            background: var(--navy);
-            color: white;
-            width: 50px;
-            height: 50px;
-            border-radius: 12px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 24px;
-            margin: 0 auto 15px;
-        }
+    .step-indicator {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        margin-bottom: 30px;
+        opacity: 0.4;
+        transition: 0.3s;
+    }
 
-        h2 { color: var(--navy); margin: 0; font-size: 24px; text-align: center; }
-        p.subtitle { color: var(--slate); font-size: 14px; text-align: center; margin-top: 5px; }
+    .step-indicator.active { opacity: 1; color: var(--gold); }
+    .step-number {
+        width: 30px; height: 30px; border-radius: 50%;
+        border: 2px solid currentColor; display: flex;
+        align-items: center; justify-content: center; font-weight: 800;
+    }
 
-        .form-group { margin-top: 20px; }
-        label { 
-            display: block; 
-            color: var(--navy); 
-            font-weight: 700; 
-            margin-bottom: 8px; 
-            font-size: 12px; 
-            text-transform: uppercase;
-        }
+    /* Zone de Formulaire */
+    .setup-content { flex-grow: 1; padding: 50px; position: relative; }
+    .setup-pane { display: none; animation: slideUp 0.4s ease; }
+    .setup-pane.active { display: block; }
 
-        input {
-            width: 100%;
-            padding: 12px 15px;
-            border: 2px solid var(--border);
-            border-radius: 10px;
-            box-sizing: border-box;
-            outline: none;
-            transition: 0.3s;
-        }
+    .config-card {
+        background: rgba(0,0,0,0.2);
+        border: 1px solid rgba(255,255,255,0.05);
+        padding: 20px;
+        border-radius: 15px;
+        margin-bottom: 20px;
+    }
 
-        input:focus { border-color: var(--gold); }
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
 
-        .btn-install {
-            width: 100%;
-            background-color: var(--navy);
-            color: white;
-            padding: 15px;
-            border: none;
-            border-radius: 10px;
-            font-weight: bold;
-            cursor: pointer;
-            margin-top: 25px;
-            transition: 0.3s;
-        }
+    input, select {
+        width: 100%; background: #020617; border: 1px solid #1E293B;
+        padding: 12px; border-radius: 10px; color: white; margin-top: 8px;
+    }
 
-        .btn-install:hover { background-color: #000000; transform: translateY(-2px); }
-    </style>
-</head>
-<body>
-    <div class="init-card">
-        <div class="logo-area">
-            <div class="logo-icon"><i class="fa-solid fa-graduation-cap"></i></div>
-            <h2>Initialisation Master</h2>
-            <p class="subtitle">Enregistrement de l'autorité administrative</p>
-        </div>
-        
-        <div class="form-group">
-            <label>Nom de l'École</label>
-            <input type="text" placeholder="ex: Collège Maranatha">
-        </div>
-        
-        <div class="form-group">
-            <label>Nom du Directeur (D.E)</label>
-            <input type="text" placeholder="Nom complet">
-        </div>
+    .btn-action {
+        background: var(--gold); color: white; border: none;
+        padding: 15px 35px; border-radius: 12px; font-weight: 800;
+        cursor: pointer; transition: 0.3s;
+    }
+    .btn-action:hover { transform: scale(1.05); box-shadow: 0 0 20px rgba(180, 83, 9, 0.4); }
 
-        <div class="form-group">
-            <label>Mot de passe Système</label>
-            <input type="password" placeholder="••••••••">
-        </div>
-
-        <div class="form-group">
-            <label>Clé de Licence</label>
-            <input type="text" placeholder="SCH-2026-XXXX">
-        </div>
-
-        <button class="btn-install" onclick="alert('Installation système en cours...')">ACTIVER SCHOLARITE</button>
+    @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+</style>
+<div class="setup-wizard">
+    <div class="setup-sidebar">
+        <div class="step-indicator active" id="ind-1"><div class="step-number">1</div><span>Identité</span></div>
+        <div class="step-indicator" id="ind-2"><div class="step-number">2</div><span>Académique</span></div>
+        <div class="step-indicator" id="ind-3"><div class="step-number">3</div><span>Finances</span></div>
+        <div class="step-indicator" id="ind-4"><div class="step-number">4</div><span>Déploiement</span></div>
     </div>
-</body>
-</html>
 
+    <div class="setup-content">
+        <div class="setup-pane active" id="pane-1">
+            <h2 style="margin-bottom:10px">Personnalisation visuelle</h2>
+            <p style="color:#64748B; margin-bottom:30px">Adaptez le logiciel à l'image de votre établissement.</p>
+            
+            <div class="config-card">
+                <label>Nom complet de l'établissement</label>
+                <input type="text" id="school_name" placeholder="ex: Complexe Scolaire Maranatha">
+                
+                <div class="grid-2" style="margin-top:20px">
+                    <div>
+                        <label>Slogan (Devise)</label>
+                        <input type="text" id="school_slogan" placeholder="Science - Travail - Succès">
+                    </div>
+                    <div>
+                        <label>Couleur Thème</label>
+                        <input type="color" id="school_color" value="#B45309">
+                    </div>
+                </div>
+            </div>
+            <button class="btn-action" onclick="go(2)">Suivant : Structure</button>
+        </div>
+
+        <div class="setup-pane" id="pane-2">
+            <h2>Architecture des Classes</h2>
+            <p style="color:#64748B; margin-bottom:30px">Définissez les niveaux et les options (ex: 3e Électricité).</p>
+            
+            <div class="config-card">
+                <div style="display:flex; gap:10px; margin-bottom:15px">
+                    <select id="level_select">
+                        <option>Maternelle</option><option>Primaire</option><option selected>Humanités</option>
+                    </select>
+                    <input type="text" id="class_name" placeholder="Nom de la classe (ex: 3e)">
+                </div>
+                <div id="option_tags" style="display:flex; flex-wrap:wrap; gap:8px">
+                    </div>
+            </div>
+            <button class="btn-action" onclick="go(3)">Suivant : Tarification</button>
+        </div>
+
+        <div class="setup-pane" id="pane-3">
+            <h2>Plan de Trésorerie</h2>
+            <p style="color:#64748B; margin-bottom:30px">Configurez les montants des frais pour l'année.</p>
+            
+            <div class="config-card">
+                <div class="grid-2">
+                    <div>
+                        <label>Minerval Annuel ($)</label>
+                        <input type="number" id="fee_total" value="450">
+                    </div>
+                    <div>
+                        <label>Frais Divers ($)</label>
+                        <input type="number" id="fee_misc" value="50">
+                    </div>
+                </div>
+                <div style="margin-top:20px">
+                    <label>Nombre de tranches de paiement</label>
+                    <select id="installments">
+                        <option value="1">Paiement Unique</option>
+                        <option value="2">2 Tranches (Semestriel)</option>
+                        <option value="3" selected>3 Tranches (Trimestriel)</option>
+                    </select>
+                </div>
+            </div>
+            <button class="btn-action" onclick="go(4)">Finaliser l'installation</button>
+        </div>
+
+        <div class="setup-pane" id="pane-4" style="text-align:center">
+            <div style="font-size:60px; color:var(--gold); margin-bottom:20px">
+                <i class="fa-solid fa-rocket"></i>
+            </div>
+            <h2>Prêt pour le déploiement !</h2>
+            <p style="color:#64748B; margin-bottom:30px">Le moteur Platinum va générer votre base de données personnalisée.</p>
+            
+            <div id="summary-box" style="text-align:left; font-size:13px; color:#94A3B8; background:#000; padding:20px; border-radius:12px; margin-bottom:30px">
+                </div>
+            <button class="btn-action" onclick="deploySystem()" style="width:100%">INSTALLER LE SYSTÈME</button>
+        </div>
+    </div>
+</div>
+<script>
+    let setupData = {
+        name: "",
+        color: "#B45309",
+        options: ["Électricité", "Commerciale", "Scientifique"],
+        totalFees: 0
+    };
+
+    function go(step) {
+        // Mise à jour visuelle des indicateurs
+        document.querySelectorAll('.setup-pane').forEach(p => p.classList.remove('active'));
+        document.querySelectorAll('.step-indicator').forEach(i => i.classList.remove('active'));
+        
+        document.getElementById('pane-' + step).classList.add('active');
+        document.getElementById('ind-' + step).classList.add('active');
+
+        if(step === 4) generateSummary();
+    }
+
+    function generateSummary() {
+        const name = document.getElementById('school_name').value || "Non défini";
+        const fee = document.getElementById('fee_total').value;
+        const inst = document.getElementById('installments').value;
+        
+        document.getElementById('summary-box').innerHTML = `
+            <strong>Établissement :</strong> ${name}<br>
+            <strong>Structure :</strong> ${setupData.options.join(', ')}<br>
+            <strong>Frais Scolaires :</strong> ${fee}$ payables en ${inst} tranches.<br>
+            <strong>Statut :</strong> Prêt à injecter dans Supabase.
+        `;
+    }
+
+    async function deploySystem() {
+        const btn = document.querySelector('#pane-4 .btn-action');
+        btn.innerHTML = '<i class="fa-solid fa-gear fa-spin"></i> Création des tables...';
+        
+        // Ici, on sauvegarde les préférences dans localStorage pour que TOUTES 
+        // les autres pages (index, promoteur, etc.) utilisent ces données.
+        localStorage.setItem('platinum_config', JSON.stringify({
+            schoolName: document.getElementById('school_name').value,
+            mainColor: document.getElementById('school_color').value,
+            installments: document.getElementById('installments').value
+        }));
+
+        setTimeout(() => {
+            alert("Système déployé avec succès sur le Cloud !");
+            window.location.href = "index.html";
+        }, 3000);
+    }
+</script>
