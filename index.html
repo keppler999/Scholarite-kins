@@ -1,115 +1,204 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Platinum Security | Centre de Contrôle</title>
+    
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=JetBrains+Mono&display=swap');
+
+        :root {
+            --bg-ultra: #020617;
+            --accent-gold: #B45309;
+            --danger-red: #991B1B;
+            --text-main: #F8FAFC;
+            --text-dim: #64748B;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: 'Inter', sans-serif; background: var(--bg-ultra); 
+            color: var(--text-main); display: flex; height: 100vh; overflow: hidden;
+            background-image: radial-gradient(circle at 100% 100%, #1e293b 0%, #020617 100%);
+        }
+
+        /* --- SIDEBAR --- */
+        .sidebar-auth { 
+            width: 280px; background: #000; border-right: 1px solid rgba(180, 83, 9, 0.2); 
+            display: flex; flex-direction: column; padding: 40px 20px;
+        }
+        .sidebar-auth h2 { font-size: 11px; letter-spacing: 3px; color: var(--accent-gold); margin-bottom: 50px; font-weight: 800; }
+        
+        .nav-item { 
+            padding: 18px 20px; border-radius: 12px; cursor: pointer; color: var(--text-dim); 
+            transition: 0.3s; display: flex; align-items: center; gap: 15px; margin-bottom: 10px;
+            font-size: 12px; font-weight: 600; text-decoration: none;
+        }
+        .nav-item:hover { background: rgba(255,255,255,0.03); color: #fff; }
+        .nav-item.active { background: rgba(180, 83, 9, 0.1); color: #fff; border: 1px solid rgba(180, 83, 9, 0.3); }
+
+        .main-auth { flex-grow: 1; padding: 40px; display: flex; flex-direction: column; }
+
+        /* --- CHAT ENGINE --- */
+        .chat-layout {
+            display: flex; flex-direction: column; height: 100%;
+            background: rgba(0,0,0,0.5); border-radius: 24px; border: 1px solid rgba(153, 27, 27, 0.2);
+            overflow: hidden; backdrop-filter: blur(10px);
+        }
+        .chat-header { 
+            padding: 20px 25px; background: rgba(153, 27, 27, 0.1); border-bottom: 1px solid rgba(153, 27, 27, 0.2);
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .chat-messages { flex-grow: 1; padding: 25px; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; scroll-behavior: smooth; }
+        
+        .bubble {
+            max-width: 75%; padding: 12px 18px; border-radius: 18px; font-size: 13px; line-height: 1.5;
+            position: relative; animation: slideUp 0.3s ease;
+        }
+        .received { background: #1e293b; align-self: flex-start; border-bottom-left-radius: 2px; border-left: 3px solid var(--danger-red); }
+        .sent { background: rgba(180, 83, 9, 0.2); align-self: flex-end; border-bottom-right-radius: 2px; border-right: 3px solid var(--accent-gold); }
+        
+        .bubble-meta { font-size: 9px; color: var(--text-dim); margin-bottom: 5px; font-weight: 800; text-transform: uppercase; }
+
+        .chat-input-area { 
+            padding: 25px; background: #000; border-top: 1px solid rgba(255,255,255,0.05); 
+            display: flex; gap: 12px; 
+        }
+        .chat-input-area input { 
+            flex-grow: 1; background: #0f172a; border: 1px solid #1e293b; color: white; 
+            padding: 15px 20px; border-radius: 12px; font-family: 'JetBrains Mono', monospace; font-size: 13px;
+        }
+        .btn-send { 
+            background: var(--accent-gold); border: none; color: white; 
+            padding: 0 25px; border-radius: 12px; cursor: pointer; font-weight: 800; transition: 0.2s;
+        }
+        .btn-send:hover { transform: scale(1.05); background: #d97706; }
+
+        .pulse-red { animation: pulse 2s infinite; }
+        @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(153, 27, 27, 0.4); } 70% { box-shadow: 0 0 0 10px rgba(153, 27, 27, 0); } 100% { box-shadow: 0 0 0 0 rgba(153, 27, 27, 0); } }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        /* Personnalisation Scrollbar */
+        .chat-messages::-webkit-scrollbar { width: 5px; }
+        .chat-messages::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
+    </style>
+</head>
+
 <body>
-    <div class="login-card">
-        <div class="logo-area">
-            <h1>SCHOLARITE</h1>
-            <p>Platinum Edition v2.0</p>
+    <aside class="sidebar-auth">
+        <h2>PLATINUM SECURITY</h2>
+        <div class="nav-item"><i class="fa-solid fa-shield-halved"></i> Architecture</div>
+        <div class="nav-item active pulse-red">
+            <i class="fa-solid fa-bullhorn"></i> Canal Refoulement
+            <span id="badge-live" style="background:var(--danger-red); color:white; font-size:8px; padding:2px 6px; border-radius:10px; margin-left:8px">LIVE</span>
         </div>
+        <div class="nav-item" onclick="handleLogout()" style="margin-top:auto; color:var(--danger-red)">
+            <i class="fa-solid fa-power-off"></i> Déconnexion
+        </div>
+    </aside>
 
-        <form id="login-form">
-            <div class="input-group">
-                <label><i class="fa-solid fa-envelope"></i> Email Professionnel</label>
-                <input type="email" id="email" class="input-field" placeholder="ex: direction@ecole.com" required>
+    <main class="main-auth">
+        <div class="chat-layout">
+            <div class="chat-header">
+                <div>
+                    <h3 style="color:var(--danger-red); font-size:14px; letter-spacing:1px">ALERTE REFOULEMENT ACTIVE</h3>
+                    <p style="font-size:10px; color:var(--text-dim)">Protocole d'exclusion temporaire</p>
+                </div>
+                <div style="font-family:'JetBrains Mono'; font-size:11px; color:var(--accent-gold)">SYNC: OK</div>
             </div>
+            
+            <div class="chat-messages" id="messages-container"></div>
 
-            <div class="input-group">
-                <label><i class="fa-solid fa-lock"></i> Mot de passe</label>
-                <input type="password" id="password" class="input-field" placeholder="••••••••" required>
+            <div class="chat-input-area">
+                <input type="text" id="msg-input" placeholder="Matricule, nom ou motif de refoulement..." autofocus>
+                <button class="btn-send" id="send-btn"><i class="fa-solid fa-paper-plane"></i></button>
             </div>
-
-            <button type="submit" class="btn-login" id="btn-text">ACCÉDER AU SYSTÈME</button>
-        </form>
-
-        <div id="error-msg" style="color: #EF4444; font-size: 13px; margin-top: 15px; display: none;">
-            Identifiants invalides ou accès non autorisé.
         </div>
-
-        <div class="footer-links">
-            <p>Besoin d'assistance ? <a href="#">Contactez l'administrateur</a></p>
-            <p style="margin-top: 10px; font-size: 10px; opacity: 0.5;">ID de session sécurisé par Supabase Auth</p>
-        </div>
-    </div>
+    </main>
 
     <script>
-        const SUPABASE_URL = "https://chpydetdbfugwwhsvgin.supabase.co";
-        const SUPABASE_KEY = "sb_publishable_G3rNGdnIihPNVfaLj1C4VQ_1TUBFh_z";
-        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        const SUPABASE_URL = "https://chpydetdbfugwwhsvgin.supabase.co"; 
+        const SUPABASE_KEY = "sb_publishable_G3rNGdnIihPNVfaLj1C4VQ_1TUBFh_z"; 
+        const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        const loginForm = document.getElementById('login-form');
-        const errorMsg = document.getElementById('error-msg');
-        const btnText = document.getElementById('btn-text');
+        // Rôle à adapter dynamiquement plus tard si nécessaire
+        const currentRole = "COMPTABILITÉ"; 
 
-        loginForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            btnText.innerText = "VÉRIFICATION...";
-            errorMsg.style.display = 'none';
+        // Initialisation Realtime
+        const channel = _supabase
+            .channel('refoulement_updates')
+            .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'chat_refoulement' }, payload => {
+                const msg = payload.new;
+                displayMessage(msg.sender, msg.content, msg.sender === currentRole ? 'sent' : 'received');
+                
+                // Son d'alerte si le message vient de l'autre partie
+                if (msg.sender !== currentRole) {
+                    const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
+                    audio.play().catch(e => console.log("Audio bloqué par le navigateur"));
+                }
+            })
+            .subscribe();
 
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
+        async function loadHistory() {
+            const { data } = await _supabase
+                .from('chat_refoulement')
+                .select('*')
+                .order('created_at', { ascending: true });
 
-            // 1. Authentification
-            const { data, error } = await supabase.auth.signInWithPassword({
-                email: email,
-                password: password,
-            });
-
-            if (error) {
-                showError(error.message);
-                return;
+            if (data) {
+                const container = document.getElementById('messages-container');
+                container.innerHTML = "";
+                data.forEach(m => displayMessage(m.sender, m.content, m.sender === currentRole ? 'sent' : 'received'));
             }
+        }
 
-            // 2. Récupération du profil et redirection
-            handleRedirection(data.user);
+        async function sendMessage() {
+            const input = document.getElementById('msg-input');
+            const content = input.value.trim();
+            if (!content) return;
+
+            const { error } = await _supabase
+                .from('chat_refoulement')
+                .insert([{ sender: currentRole, content: content, type: 'alert' }]);
+
+            if (!error) {
+                input.value = "";
+                input.focus();
+            }
+        }
+
+        function displayMessage(sender, text, type) {
+            const container = document.getElementById('messages-container');
+            const div = document.createElement('div');
+            div.className = `bubble ${type}`;
+            
+            const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            
+            div.innerHTML = `
+                <div class="bubble-meta">${sender} • ${time}</div>
+                <div style="font-weight: 500;">${text}</div>
+            `;
+            
+            container.appendChild(div);
+            container.scrollTop = container.scrollHeight;
+        }
+
+        async function handleLogout() {
+            await _supabase.auth.signOut();
+            window.location.href = 'index.html';
+        }
+
+        // Event Listeners
+        document.getElementById('send-btn').addEventListener('click', sendMessage);
+        document.getElementById('msg-input').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') sendMessage();
         });
 
-        async function handleRedirection(user) {
-            // On cherche le rôle de l'utilisateur dans une table 'profiles'
-            const { data: profile, error } = await supabase
-                .from('profiles')
-                .select('role')
-                .eq('id', user.id)
-                .single();
-
-            if (error || !profile) {
-                // Si pas de profil spécifique, on vérifie si c'est un parent
-                checkIfParent(user);
-                return;
-            }
-
-            // Redirection basée sur le rôle
-            switch (profile.role) {
-                case 'promoteur':
-                    window.location.href = 'promoteur.html';
-                    break;
-                case 'discipline':
-                case 'securite':
-                    window.location.href = 'security.html';
-                    break;
-                default:
-                    showError("Rôle non reconnu.");
-            }
-        }
-
-        async function checkIfParent(user) {
-            // Logique pour vérifier si l'email correspond à un parent dans la table 'students'
-            const { data: student } = await supabase
-                .from('students')
-                .select('id')
-                .eq('parent_email', user.email)
-                .single();
-
-            if (student) {
-                window.location.href = 'parent.html';
-            } else {
-                showError("Aucun profil associé à ce compte.");
-                await supabase.auth.signOut();
-            }
-        }
-
-        function showError(text) {
-            errorMsg.innerText = text;
-            errorMsg.style.display = 'block';
-            btnText.innerText = "ACCÉDER AU SYSTÈME";
-        }
+        window.onload = loadHistory;
     </script>
 </body>
 </html>
