@@ -1,111 +1,225 @@
--- ==========================================
--- SCHOLARITE - SCHEMA OFFICIEL DE LA BASE DE DONNÉES
--- Version : 1.0.2 (Intégration Complète)
--- ==========================================
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scholarite Platinum | Système Unifié</title>
+    
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&family=JetBrains+Mono&display=swap');
 
--- 1. PÔLE STRUCTURE (LE SQUELETTE)
-CREATE TABLE IF NOT EXISTS annees_scolaires (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    libelle TEXT NOT NULL, -- ex: 2025-2026
-    statut TEXT DEFAULT 'OUVERTE',
-    date_creation TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-);
+        :root {
+            --primary: #3B82F6; --compta: #B45309; --dir: #8B5CF6;
+            --bg: #020617; --panel: #0F172A; --border: rgba(255, 255, 255, 0.05);
+            --success: #10B981; --danger: #EF4444;
+        }
 
-CREATE TABLE IF NOT EXISTS options (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    nom TEXT NOT NULL -- ex: Électricité, Commerciale, Sociale
-);
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background: var(--bg); color: white; display: flex; height: 100vh; overflow: hidden; }
 
-CREATE TABLE IF NOT EXISTS classes (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    nom TEXT NOT NULL,
-    option_id UUID REFERENCES options(id),
-    niveau INT -- ex: 1, 2, 3 (pour 3e Électricité)
-);
+        /* --- DASHBOARD UI --- */
+        .sidebar { width: 280px; background: #000; border-right: 1px solid var(--border); padding: 25px; display: flex; flex-direction: column; }
+        .main-view { flex-grow: 1; padding: 30px; overflow-y: auto; }
+        
+        .nav-link { padding: 12px; border-radius: 12px; color: #64748B; cursor: pointer; display: flex; align-items: center; gap: 12px; margin-bottom: 5px; transition: 0.3s; }
+        .nav-link.active { background: rgba(59, 130, 246, 0.1); color: var(--primary); }
+        .nav-link:hover { background: rgba(255,255,255,0.05); }
 
--- 2. PÔLE UTILISATEURS & SÉCURITÉ
-CREATE TABLE IF NOT EXISTS jetons_acces (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    code_jeton TEXT UNIQUE NOT NULL,
-    module_cible TEXT CHECK (module_cible IN ('PROMOTEUR', 'COMPTABLE', 'PROF', 'DE')),
-    nom_destinataire TEXT,
-    statut TEXT DEFAULT 'DISPONIBLE',
-    cree_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-);
+        .stat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-bottom: 30px; }
+        .stat-card { background: var(--panel); padding: 20px; border-radius: 20px; border: 1px solid var(--border); }
+        .stat-card h3 { font-family: 'JetBrains Mono'; font-size: 22px; margin-top: 8px; }
 
--- 3. PÔLE ÉDUCATIF (LE CASIER VIRTUEL & PERFORMANCE)
-CREATE TABLE IF NOT EXISTS eleves (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    matricule TEXT UNIQUE NOT NULL,
-    nom TEXT NOT NULL,
-    postnom TEXT,
-    prenom TEXT,
-    genre CHAR(1),
-    date_naissance DATE,
-    photo_url TEXT,
-    classe_id UUID REFERENCES classes(id),
-    statut_discipline TEXT DEFAULT 'VERT', -- VERT (Bon), ORANGE (Averti), ROUGE (Effraction)
-    etat_eleve TEXT DEFAULT 'ACTIF', -- ACTIF, ABANDON, RENVOYE
-    cree_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-);
+        .workspace { background: var(--panel); border-radius: 25px; border: 1px solid var(--border); padding: 25px; min-height: 400px; }
+        
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th { text-align: left; padding: 12px; color: #64748B; font-size: 11px; text-transform: uppercase; border-bottom: 1px solid var(--border); }
+        td { padding: 15px 12px; border-bottom: 1px solid rgba(255,255,255,0.02); font-size: 14px; }
 
-CREATE TABLE IF NOT EXISTS professeurs (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    nom_complet TEXT NOT NULL,
-    grade_direction TEXT DEFAULT 'BON', -- BON, TRES BON, EXCELLENT, TRES EXCELLENT
-    contact TEXT
-);
+        /* --- BUTTONS --- */
+        .btn { padding: 10px 20px; border-radius: 10px; border: none; font-weight: 700; cursor: pointer; transition: 0.2s; font-size: 12px; }
+        .btn-compta { background: var(--compta); color: white; }
+        .btn-sync { background: var(--primary); color: white; }
 
-CREATE TABLE IF NOT EXISTS cours (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    nom_cours TEXT NOT NULL,
-    coefficient INT DEFAULT 1
-);
+        /* --- MODALS --- */
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(5px); display: none; justify-content: center; align-items: center; z-index: 100; }
+        .modal-box { background: var(--panel); padding: 35px; border-radius: 25px; width: 450px; border: 1px solid var(--border); }
+    </style>
+</head>
+<body>
 
-CREATE TABLE IF NOT EXISTS horaires (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    classe_id UUID REFERENCES classes(id),
-    prof_id UUID REFERENCES professeurs(id),
-    cours_id UUID REFERENCES cours(id),
-    jour TEXT,
-    heure_debut TIME,
-    heure_fin TIME
-);
+    <aside class="sidebar">
+        <div style="margin-bottom: 40px; display: flex; align-items: center; gap: 12px;">
+            <div style="width: 42px; height: 42px; background: var(--primary); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 20px;">S</div>
+            <div><h2 style="font-size: 16px;">SCHOLARITE</h2><small style="color: var(--success); font-weight: 800;">PLATINUM v1.0.2</small></div>
+        </div>
 
-CREATE TABLE IF NOT EXISTS notes (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    eleve_id UUID REFERENCES eleves(id),
-    cours_id UUID REFERENCES cours(id),
-    valeur_note DECIMAL(5,2) NOT NULL,
-    periode TEXT, -- EXAMEN 1, PERIODE 2, etc.
-    saisi_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-);
+        <div class="nav-link active" onclick="loadModule('compta')"><i class="fa-solid fa-wallet"></i> Finance & Caisse</div>
+        <div class="nav-link" onclick="loadModule('pedagogie')"><i class="fa-solid fa-chalkboard-user"></i> Pédagogie</div>
+        <div class="nav-link" onclick="loadModule('direction')"><i class="fa-solid fa-user-shield"></i> Direction</div>
+        <div class="nav-link" onclick="loadModule('discipline')"><i class="fa-solid fa-scale-balanced"></i> Discipline</div>
 
-CREATE TABLE IF NOT EXISTS incidents_discipline (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    eleve_id UUID REFERENCES eleves(id),
-    titre_incident TEXT, -- ex: "Bagarre dans la cour"
-    description TEXT,
-    date_incident DATE DEFAULT CURRENT_DATE,
-    gravite TEXT -- ORANGE ou ROUGE
-);
+        <div style="margin-top: auto; padding: 15px; background: rgba(255,255,255,0.03); border-radius: 15px;">
+            <small style="color: #64748B;">BDD STATUS</small>
+            <p id="db-status" style="font-size: 12px; margin-top: 5px;"><i class="fa-solid fa-circle-dot" style="color: var(--danger)"></i> Déconnecté</p>
+        </div>
+    </aside>
 
--- 4. PÔLE FINANCE (LA CAISSE)
-CREATE TABLE IF NOT EXISTS finances (
-    id bigserial PRIMARY KEY,
-    eleve_id UUID REFERENCES eleves(id),
-    nom_eleve TEXT, -- Doublon pour sécurité de lecture rapide
-    montant_paye NUMERIC NOT NULL,
-    motif_paiement TEXT, -- ex: Minerval, Frais techniques
-    date_paiement TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-);
+    <main class="main-view">
+        <header style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+            <h1 id="module-title">Tableau de Bord</h1>
+            <button class="btn btn-sync" onclick="refreshAll()"><i class="fa-solid fa-arrows-rotate"></i> Sync. Supabase</button>
+        </header>
 
--- 5. ÉVÉNEMENTS (LE PROGRAMME)
-CREATE TABLE IF NOT EXISTS programme_scolaire (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    titre_event TEXT NOT NULL,
-    description TEXT,
-    date_debut DATE,
-    nombre_jours INT DEFAULT 1,
-    type_event TEXT -- TEST_GENERAL, EXAMEN, SPORT, SORTIE
-);
+        <div class="stat-grid">
+            <div class="stat-card"><small>CAISSE JOUR</small><h3 id="stat-caisse">0.00 $</h3></div>
+            <div class="stat-card"><small>PRÉSENCE GLOBALE</small><h3 id="stat-pres">0%</h3></div>
+            <div class="stat-card"><small>COTES VALIDÉES</small><h3 id="stat-notes">0%</h3></div>
+            <div class="stat-card"><small>ALERTE DISCIPLINE</small><h3 id="stat-disc" style="color:var(--danger)">0</h3></div>
+        </div>
+
+        <section class="workspace">
+            <div id="module-content">
+                <p style="color: #64748B; text-align: center; margin-top: 50px;">Initialisation du système...</p>
+            </div>
+        </section>
+    </main>
+
+    <div class="modal-overlay" id="pay-modal">
+        <div class="modal-box">
+            <h2 style="margin-bottom: 20px;">Encaisser Frais</h2>
+            <div style="margin-bottom: 15px;">
+                <label style="font-size: 12px; color: #64748B;">ÉLÈVE</label>
+                <select id="pay-student-list" style="width: 100%; padding: 12px; background: #000; color: white; border-radius: 10px; border: 1px solid var(--border); margin-top: 5px;"></select>
+            </div>
+            <div style="margin-bottom: 20px;">
+                <label style="font-size: 12px; color: #64748B;">MONTANT (USD)</label>
+                <input type="number" id="pay-amount" style="width: 100%; padding: 12px; background: #000; color: white; border-radius: 10px; border: 1px solid var(--border); margin-top: 5px; font-size: 20px;">
+            </div>
+            <div style="display: flex; gap: 10px;">
+                <button class="btn btn-compta" style="flex-grow: 1;" onclick="submitPayment()">VALIDER PAIEMENT</button>
+                <button class="btn" style="background: #1E293B; color: white;" onclick="closeModal()">ANNULER</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- CONFIGURATION SUPABASE (UTILISE TES IDENTIFIANTS) ---
+        const SB_URL = "https://VOTRE_PROJET.supabase.co";
+        const SB_KEY = "VOTRE_CLE_ANON";
+        const supabaseClient = supabase.createClient(SB_URL, SB_KEY);
+
+        // --- ÉTAT GLOBAL ---
+        let currentEleves = [];
+
+        // --- INITIALISATION ---
+        window.onload = async () => {
+            const connected = await checkDB();
+            if(connected) {
+                document.getElementById('db-status').innerHTML = '<i class="fa-solid fa-circle-dot" style="color: var(--success)"></i> Connecté à Supabase';
+                refreshAll();
+            }
+            loadModule('compta');
+        };
+
+        async function checkDB() {
+            try {
+                const { data, error } = await supabaseClient.from('eleves').select('count', { count: 'exact', head: true });
+                return !error;
+            } catch(e) { return false; }
+        }
+
+        async function refreshAll() {
+            // Récupérer les élèves depuis ta table 'eleves'
+            const { data: eleves } = await supabaseClient.from('eleves').select('*, classes(nom)');
+            currentEleves = eleves || [];
+            
+            // Récupérer total finances
+            const { data: finances } = await supabaseClient.from('finances').select('montant_paye');
+            const total = finances?.reduce((sum, f) => sum + parseFloat(f.montant_paye), 0) || 0;
+            document.getElementById('stat-caisse').innerText = total.toFixed(2) + " $";
+
+            updateModuleUI();
+        }
+
+        // --- NAVIGATION ---
+        function loadModule(type) {
+            const content = document.getElementById('module-content');
+            const title = document.getElementById('module-title');
+            
+            document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+            event.target.closest('.nav-link').classList.add('active');
+
+            if(type === 'compta') {
+                title.innerText = "Gestion Financière";
+                content.innerHTML = `
+                    <div style="display:flex; justify-content:space-between; align-items:center">
+                        <h3>Registre des Paiements</h3>
+                        <button class="btn btn-compta" onclick="openPayModal()"><i class="fa-solid fa-plus"></i> Nouvel Encaissement</button>
+                    </div>
+                    <table id="table-compta">
+                        <thead><tr><th>ÉLÈVE</th><th>CLASSE</th><th>MONTANT PAYÉ</th><th>ACTION</th></tr></thead>
+                        <tbody id="compta-body"></tbody>
+                    </table>
+                `;
+                renderCompta();
+            }
+            // Autres modules à charger ici selon le même modèle...
+        }
+
+        // --- LOGIQUE FINANCIÈRE ---
+        function renderCompta() {
+            const body = document.getElementById('compta-body');
+            body.innerHTML = currentEleves.map(e => `
+                <tr>
+                    <td><b>${e.nom} ${e.postnom || ''}</b></td>
+                    <td>${e.classes?.nom || 'N/A'}</td>
+                    <td style="font-family: 'JetBrains Mono'; font-weight: 800;">${(e.total_paye || 0).toFixed(2)} $</td>
+                    <td><button class="btn btn-sync" style="padding:5px 10px" onclick="printReceipt('${e.nom}')">📜 Reçu</button></td>
+                </tr>
+            `).join('');
+        }
+
+        function openPayModal() {
+            const list = document.getElementById('pay-student-list');
+            list.innerHTML = currentEleves.map(e => `<option value="${e.id}">${e.nom} ${e.postnom || ''}</option>`).join('');
+            document.getElementById('pay-modal').style.display = 'flex';
+        }
+
+        async function submitPayment() {
+            const id = document.getElementById('pay-student-list').value;
+            const amount = document.getElementById('pay-amount').value;
+            const student = currentEleves.find(e => e.id === id);
+
+            if(!amount) return;
+
+            // Insertion dans ta table 'finances'
+            const { error } = await supabaseClient.from('finances').insert([
+                { eleve_id: id, nom_eleve: student.nom, montant_paye: amount, motif_paiement: 'Frais Scolaires' }
+            ]);
+
+            if(!error) {
+                alert("Paiement enregistré avec succès !");
+                closeModal();
+                refreshAll();
+            }
+        }
+
+        // --- UTILITAIRES ---
+        function closeModal() { document.getElementById('pay-modal').style.display = 'none'; }
+        
+        function printReceipt(name) {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            doc.text(`RECU DE PAIEMENT - ${name.toUpperCase()}`, 20, 20);
+            doc.text(`Date: ${new Date().toLocaleDateString()}`, 20, 30);
+            doc.save(`Recu_${name}.pdf`);
+        }
+    </script>
+</body>
+</html>
+            
