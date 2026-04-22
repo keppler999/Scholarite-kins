@@ -3,393 +3,402 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Scholarite PRO | Dashboard Promoteur</title>
+    <title>Scholarite PLATINUM v2.0 | Système Expert Promoteur</title>
     
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     
     <style>
-        /* ==========================================
-           1. VARIABLES ET DESIGN SYSTEM (Lignes 15-80)
-           ========================================== */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;900&display=swap');
+
         :root {
-            --primary: #0F172A;
-            --accent: #B45309;
-            --accent-light: #FDE68A;
-            --bg-body: #F1F5F9;
-            --white: #FFFFFF;
-            --text-dark: #0F172A;
-            --text-gray: #64748B;
+            --bg-deep: #020617;
+            --card-glass: rgba(15, 23, 42, 0.9);
+            --accent-gold: #B45309;
+            --gold-bright: #FDE68A;
+            --text-main: #F8FAFC;
+            --text-dim: #64748B;
+            --sidebar-w: 280px;
             --success: #10B981;
-            --warning: #F59E0B;
             --danger: #EF4444;
-            --sidebar-width: 280px;
-            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+            --warning: #F59E0B;
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Inter', sans-serif; background: var(--bg-body); color: var(--text-dark); display: flex; min-height: 100vh; }
+        * { margin: 0; padding: 0; box-sizing: border-box; outline: none; }
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background: var(--bg-deep); 
+            color: var(--text-main); 
+            display: flex; 
+            min-height: 100vh;
+            background-image: radial-gradient(circle at 0% 0%, #1e293b 0%, #020617 100%);
+            overflow-x: hidden;
+        }
 
-        /* ==========================================
-           2. NAVIGATION LATERALE (Lignes 81-150)
-           ========================================== */
-        .sidebar { width: var(--sidebar-width); background: var(--primary); color: white; position: fixed; height: 100vh; display: flex; flex-direction: column; box-shadow: 4px 0 10px rgba(0,0,0,0.1); }
-        .sidebar-brand { padding: 40px 20px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.1); }
-        .brand-name { font-size: 26px; font-weight: 900; color: var(--accent); letter-spacing: 3px; }
+        /* --- SIDEBAR LUXE --- */
+        .sidebar { 
+            width: var(--sidebar-w); 
+            background: #000; 
+            border-right: 1px solid rgba(180, 83, 9, 0.2); 
+            position: fixed; 
+            height: 100vh; 
+            display: flex; 
+            flex-direction: column; 
+            z-index: 1000; 
+        }
+        .sidebar-brand { padding: 45px 30px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .logo-main { font-size: 24px; font-weight: 900; color: var(--accent-gold); letter-spacing: 3px; text-shadow: 0 0 20px rgba(180, 83, 9, 0.3); }
         
-        .nav-menu { padding: 25px 0; flex-grow: 1; }
-        .nav-link { padding: 18px 30px; display: flex; align-items: center; gap: 15px; color: rgba(255,255,255,0.6); text-decoration: none; cursor: pointer; transition: all 0.3s ease; border-left: 5px solid transparent; }
-        .nav-link i { width: 20px; font-size: 18px; }
-        .nav-link:hover { background: rgba(255,255,255,0.05); color: var(--white); }
-        .nav-link.active { background: rgba(180, 83, 9, 0.1); color: var(--accent); border-left-color: var(--accent); font-weight: 600; }
+        .nav-menu { padding: 30px 0; flex-grow: 1; overflow-y: auto; }
+        .nav-link { 
+            padding: 18px 30px; 
+            display: flex; 
+            align-items: center; 
+            gap: 15px; 
+            color: var(--text-dim); 
+            text-decoration: none; 
+            cursor: pointer; 
+            transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border-left: 4px solid transparent;
+        }
+        .nav-link:hover, .nav-link.active { 
+            background: linear-gradient(90deg, rgba(180, 83, 9, 0.1), transparent); 
+            color: var(--gold-bright); 
+            border-left-color: var(--accent-gold); 
+        }
 
-        /* ==========================================
-           3. MISE EN PAGE PRINCIPALE (Lignes 151-250)
-           ========================================== */
-        .main-view { margin-left: var(--sidebar-width); flex-grow: 1; padding: 40px; }
-        .header-box { display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px; }
-        .header-title h1 { font-size: 28px; font-weight: 800; margin-bottom: 5px; }
-        .header-title p { color: var(--text-gray); font-size: 14px; }
+        /* --- CONTENU PRINCIPAL --- */
+        .main-container { margin-left: var(--sidebar-w); flex-grow: 1; padding: 50px; }
+        .header-flex { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 50px; }
 
-        .stats-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 25px; margin-bottom: 40px; }
-        .card-stat { background: var(--white); padding: 30px; border-radius: 24px; box-shadow: var(--shadow-md); border: 1px solid rgba(0,0,0,0.03); transition: 0.3s; }
-        .card-stat:hover { transform: translateY(-5px); }
-        .stat-label { font-size: 12px; font-weight: 700; color: var(--text-gray); text-transform: uppercase; letter-spacing: 1px; display: flex; align-items: center; gap: 8px; margin-bottom: 15px; }
-        .stat-number { font-size: 36px; font-weight: 900; color: var(--primary); }
+        /* --- DASHBOARD ELEMENTS --- */
+        .grid-bank { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; margin-bottom: 40px; }
+        .card-bank { 
+            background: var(--card-glass); 
+            padding: 30px; 
+            border-radius: 24px; 
+            border: 1px solid rgba(255,255,255,0.05); 
+            backdrop-filter: blur(12px);
+            position: relative;
+            transition: 0.4s;
+        }
+        .card-bank:hover { transform: translateY(-8px); border-color: var(--accent-gold); box-shadow: 0 20px 40px rgba(0,0,0,0.4); }
+        .card-label { font-size: 11px; font-weight: 800; color: var(--text-dim); text-transform: uppercase; letter-spacing: 2px; }
+        .card-value { font-size: 40px; font-weight: 900; margin: 15px 0; color: #fff; letter-spacing: -1px; }
 
-        /* ==========================================
-           4. MODULES ET TABLEAUX (Lignes 251-380)
-           ========================================== */
-        .content-panel { background: var(--white); border-radius: 24px; padding: 35px; box-shadow: var(--shadow-md); }
-        .panel-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; padding-bottom: 15px; border-bottom: 2px solid var(--bg-body); }
+        /* --- MODULES SPECIFIQUES --- */
+        .chart-container { background: var(--card-glass); border-radius: 30px; padding: 40px; border: 1px solid rgba(255,255,255,0.05); margin-bottom: 40px; min-height: 400px; }
         
-        table { width: 100%; border-collapse: separate; border-spacing: 0 10px; }
-        th { padding: 15px 20px; text-align: left; font-size: 11px; text-transform: uppercase; color: var(--text-gray); font-weight: 800; }
-        td { padding: 20px; background: #fff; border-top: 1px solid #f1f5f9; border-bottom: 1px solid #f1f5f9; font-size: 14px; }
-        td:first-child { border-left: 1px solid #f1f5f9; border-radius: 12px 0 0 12px; }
-        td:last-child { border-right: 1px solid #f1f5f9; border-radius: 0 12px 12px 0; }
+        .id-card-visual {
+            width: 380px; height: 230px;
+            background: linear-gradient(135deg, #0f172a 0%, #000 100%);
+            border-radius: 20px; border: 1px solid var(--accent-gold);
+            padding: 25px; position: relative; color: #fff;
+            box-shadow: 0 30px 60px rgba(0,0,0,0.8);
+        }
+        .section-pill { 
+            padding: 6px 15px; border-radius: 20px; font-size: 11px; font-weight: 800; 
+            background: rgba(180, 83, 9, 0.1); color: var(--gold-bright); 
+            border: 1px solid var(--accent-gold); margin-right: 8px; margin-bottom: 8px; display: inline-flex; align-items: center; gap: 8px;
+        }
 
-        /* Performance Profs Design */
-        .prof-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 25px; }
-        .prof-widget { background: #fff; border-radius: 20px; padding: 25px; border: 1px solid #e2e8f0; }
-        .prof-info { display: flex; align-items: center; gap: 15px; margin-bottom: 20px; }
-        .prof-img { width: 60px; height: 60px; background: var(--primary); border-radius: 15px; display: flex; align-items: center; justify-content: center; color: var(--accent); font-size: 24px; }
-        .perf-track { height: 10px; background: #f1f5f9; border-radius: 5px; margin: 15px 0; overflow: hidden; }
-        .perf-bar { height: 100%; background: linear-gradient(90deg, var(--accent), #d97706); transition: 1.5s ease-out; }
+        .event-item {
+            background: rgba(255,255,255,0.02); border-left: 4px solid var(--accent-gold);
+            padding: 20px; border-radius: 0 15px 15px 0; margin-bottom: 15px;
+        }
 
-        .badge-status { padding: 6px 14px; border-radius: 8px; font-size: 11px; font-weight: 800; }
-        .status-success { background: #dcfce7; color: #166534; }
-        .status-danger { background: #fee2e2; color: #991b1b; }
+        /* --- TABLES --- */
+        .table-premium { width: 100%; border-collapse: collapse; }
+        .table-premium th { text-align: left; padding: 20px; color: var(--text-dim); border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 11px; text-transform: uppercase; }
+        .table-premium td { padding: 20px; border-bottom: 1px solid rgba(255,255,255,0.02); font-size: 14px; }
 
-        @media (max-width: 1024px) { .sidebar { width: 80px; } .main-view { margin-left: 80px; } .nav-text, .brand-name { display: none; } }
+        .status-badge { padding: 4px 10px; border-radius: 6px; font-size: 10px; font-weight: 900; }
+
+        @media (max-width: 1024px) { 
+            .sidebar { width: 90px; } .main-container { margin-left: 90px; } 
+            .nav-text, .logo-sub { display: none; } 
+        }
     </style>
 </head>
 <body>
-
     <aside class="sidebar">
         <div class="sidebar-brand">
-            <span class="brand-name">SCHOLARITE</span>
+            <span class="logo-main">PLATINUM</span><br>
+            <small class="logo-sub" style="color:var(--text-dim); font-size:10px; letter-spacing:2px">ERP PROMOTEUR</small>
         </div>
         <nav class="nav-menu">
-                        <div class="nav-link" onclick="switchTab('archives', this)">
-                <i class="fa-solid fa-box-archive"></i> 
-                <span class="nav-text">Archives & Diplômes</span>
-            </div>
-
-            <div class="nav-link" onclick="switchTab('finances', this)">
-                <i class="fa-solid fa-sack-dollar"></i> 
-                <span class="nav-text">Pôle Financier</span>
-            </div>
-            
-            <div class="nav-link active" onclick="switchTab('general', this)">
-                <i class="fa-solid fa-house"></i> <span class="nav-text">Situation Générale</span>
-            </div>
-            <div class="nav-link" onclick="switchTab('eleves', this)">
-                <i class="fa-solid fa-graduation-cap"></i> <span class="nav-text">Casier Virtuel</span>
-            </div>
-            <div class="nav-link" onclick="switchTab('profs', this)">
-                <i class="fa-solid fa-user-tie"></i> <span class="nav-text">Performance Profs</span>
-            </div>
-            <div class="nav-link" onclick="switchTab('finances', this)">
-                <i class="fa-solid fa-sack-dollar"></i> <span class="nav-text">Pôle Finance</span>
-            </div>
+            <div class="nav-link active" onclick="switchTab('general', this)"><i class="fa-solid fa-gauge-high"></i><span class="nav-text">Vision 360°</span></div>
+            <div class="nav-link" onclick="switchTab('finances', this)"><i class="fa-solid fa-vault"></i><span class="nav-text">Trésorerie</span></div>
+            <div class="nav-link" onclick="switchTab('eleves', this)"><i class="fa-solid fa-address-card"></i><span class="nav-text">Badges & Casier</span></div>
+            <div class="nav-link" onclick="switchTab('discipline', this)"><i class="fa-solid fa-shield-halved"></i><span class="nav-text">Discipline Radar</span></div>
+            <div class="nav-link" onclick="switchTab('planning', this)"><i class="fa-solid fa-calendar-check"></i><span class="nav-text">Planning Filières</span></div>
+            <div class="nav-link" onclick="switchTab('profs', this)"><i class="fa-solid fa-user-tie"></i><span class="nav-text">Performance Profs</span></div>
         </nav>
-        <div class="nav-link" style="margin-top: auto; border-top: 1px solid rgba(255,255,255,0.1);" onclick="location.href='index.html'">
-            <i class="fa-solid fa-power-off"></i> <span class="nav-text">Quitter</span>
-        </div>
     </aside>
 
-    <main class="main-view">
-        <header class="header-box">
-            <div class="header-title">
-                <h1>Tableau de Bord Premium</h1>
-                <p>Bienvenue, Monsieur le Promoteur Kambale</p>
+    <main class="main-container">
+        <section id="view-general" class="tab-view">
+            <div class="header-flex">
+                <div><h1 style="font-size:32px">Dashboard Stratégique</h1><p style="color:var(--text-dim)">Analyse consolidée de l'établissement</p></div>
+                <div class="status-badge" style="background:var(--success); color:#000">SYSTÈME OPÉRATIONNEL</div>
             </div>
-            <div id="sync-status" class="badge-status status-success">
-                <i class="fa-solid fa-cloud-check"></i> SYNC SUPABASE : OK
+            
+            <div class="grid-bank">
+                <div class="card-bank">
+                    <div class="card-label">Encaissements Totaux</div>
+                    <div class="card-value" id="val-finance">0 $</div>
+                    <div style="color:var(--success); font-size:12px"><i class="fa-solid fa-caret-up"></i> Flux positif</div>
+                </div>
+                <div class="card-bank">
+                    <div class="card-label">Inscriptions Actives</div>
+                    <div class="card-value" id="val-eleves">0</div>
+                    <div style="color:var(--text-dim); font-size:12px">Capacité : 85%</div>
+                </div>
+                <div class="card-bank">
+                    <div class="card-label">Discipline Moyenne</div>
+                    <div class="card-value">94.8%</div>
+                    <div style="color:var(--accent-gold); font-size:12px">Standard Platinum</div>
+                </div>
             </div>
-        </header>
 
-        <div id="view-general" class="tab-view">
-            <div class="stats-container">
-                <div class="card-stat">
-                    <div class="stat-label"><i class="fa-solid fa-users"></i> Effectif Global</div>
-                    <div class="stat-number" id="val-eleves">--</div>
-                </div>
-                <div class="card-stat">
-                    <div class="stat-label"><i class="fa-solid fa-vault"></i> Caisse Totale</div>
-                    <div class="stat-number" id="val-finance">0 $</div>
-                </div>
-                <div class="card-stat">
-                    <div class="stat-label"><i class="fa-solid fa-gavel"></i> Cas de Discipline</div>
-                    <div class="stat-number" id="val-discipline">0</div>
-                </div>
+            <div class="chart-container">
+                <h3 style="margin-bottom:30px">Croissance des Revenus Mensuels</h3>
+                <canvas id="mainChart"></canvas>
             </div>
-            <div class="content-panel">
-                <div class="panel-header"><h3>Activités Récentes du Système</h3></div>
-                <table>
-                    <thead><tr><th>Horodatage</th><th>Action Effectuée</th><th>Opérateur</th><th>Impact</th></tr></thead>
-                    <tbody id="logs-body">
+        </section>
+
+        <section id="view-discipline" class="tab-view" style="display:none">
+            <h2 style="margin-bottom:30px">Audit Comportemental</h2>
+            <div style="display:grid; grid-template-columns: 1fr 1.5fr; gap:30px">
+                <div class="card-bank">
+                    <h3>Indice Comportemental</h3>
+                    <canvas id="disciplineRadar" style="max-height:350px"></canvas>
+                </div>
+                <div class="card-bank">
+                    <h3>Journal des Incidents Graves</h3>
+                    <table class="table-premium">
+                        <thead><tr><th>Élève</th><th>Incident</th><th>Statut</th></tr></thead>
+                        <tbody>
+                            <tr><td>Mulumba Yan</td><td>Absence Examen</td><td><span class="status-badge" style="background:var(--warning)">Averti</span></td></tr>
+                            <tr><td>Kanku Béatrice</td><td>Retard massif</td><td><span class="status-badge" style="background:var(--danger)">Convoquée</span></td></tr>
                         </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <section id="view-planning" class="tab-view" style="display:none">
+            <h2 style="margin-bottom:30px">Planning & Gestion des Sections</h2>
+            <div style="display:grid; grid-template-columns: 380px 1fr; gap:30px">
+                <div class="card-bank">
+                    <h3 style="margin-bottom:20px">Agenda Stratégique</h3>
+                    <div class="event-item"><strong>25 Avr :</strong> Réunion de Direction</div>
+                    <div class="event-item" style="border-color:var(--success)"><strong>02 Mai :</strong> Jury de Qualification</div>
+                    <div class="event-item"><strong>15 Mai :</strong> Clôture Frais Divers</div>
+                </div>
+                <div class="card-bank">
+                    <div style="display:flex; justify-content:space-between; margin-bottom:20px">
+                        <h3>Sections Actives</h3>
+                        <button onclick="addSectionUI()" style="background:none; border:1px solid var(--accent-gold); color:var(--accent-gold); padding:5px 15px; border-radius:8px; cursor:pointer">+ Ajouter une filière</button>
+                    </div>
+                    <div id="sections-box" style="margin-bottom:30px"></div>
+                    <h3>Réussite Comparative par Option</h3>
+                    <canvas id="sectionsBarChart" style="max-height:250px"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <section id="view-eleves" class="tab-view" style="display:none">
+            <h2 style="margin-bottom:30px">Casier Virtuel & Générateur de Badges</h2>
+            <div style="display:grid; grid-template-columns: 1fr 420px; gap:40px">
+                <div class="card-bank">
+                    <table class="table-premium">
+                        <thead><tr><th>Matricule</th><th>Identité</th><th>Action</th></tr></thead>
+                        <tbody id="eleves-list-body"></tbody>
+                    </table>
+                </div>
+                <div id="badge-display" style="display:flex; flex-direction:column; align-items:center; gap:30px">
+                    <p style="color:var(--text-dim)">Sélectionnez un élève pour générer le Badge Gold</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="view-finances" class="tab-view" style="display:none">
+            <h2 style="margin-bottom:30px">Journal de Caisse Centralisé</h2>
+            <div class="card-bank" style="width:100%">
+                <table class="table-premium">
+                    <thead><tr><th>Ref</th><th>Élève</th><th>Motif</th><th>Montant</th><th>Date</th></tr></thead>
+                    <tbody id="fin-body"></tbody>
                 </table>
             </div>
-        </div>
-
-        <div id="view-profs" class="tab-view" style="display:none;">
-            <div class="panel-header">
-                <h2>Rapport de Performance du Personnel</h2>
-                <button onclick="loadProfs()" style="background:var(--primary); color:white; border:none; padding:10px 20px; border-radius:10px; cursor:pointer;">
-                    <i class="fa-solid fa-rotate"></i> Recalculer les scores
-                </button>
-            </div>
-            <div class="prof-grid" id="prof-list-container">
-                </div>
-        </div>
-
-        <div id="view-eleves" class="tab-view" style="display:none;">
-            <div class="content-panel">
-                <div class="panel-header">
-                    <h2>Casier Virtuel des Élèves</h2>
-                    <input type="text" placeholder="Rechercher un matricule..." style="padding:10px; border-radius:8px; border:1px solid #ccc; width:250px;">
-                </div>
-                <table id="eleves-table">
-                    <thead><tr><th>Matricule</th><th>Identité</th><th>Classe</th><th>Statut Discipline</th><th>Action</th></tr></thead>
-                    <tbody id="eleves-body"></tbody>
-                </table>
-            </div>
-        </div>
-                <div id="view-archives" class="tab-view" style="display:none;">
-            <div class="header-box" style="margin-bottom: 20px;">
-                <div>
-                    <h2 style="color: var(--primary);">Archives Numériques</h2>
-                    <p style="color: var(--text-gray);">Consultation des anciens registres et palmarès.</p>
-                </div>
-                <div style="display: flex; gap: 10px;">
-                    <select id="archive-year" style="padding: 10px; border-radius: 8px; border: 1px solid #cbd5e1;">
-                        <option value="2025">Année 2024-2025</option>
-                        <option value="2024">Année 2023-2024</option>
-                        <option value="2023">Année 2022-2023</option>
-                    </select>
-                    <button onclick="filtrerArchives()" style="background: var(--accent); color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer;">
-                        <i class="fa-solid fa-filter"></i> Filtrer
-                    </button>
-                </div>
-            </div>
-
-            <div class="stats-grid" style="grid-template-columns: repeat(3, 1fr); margin-bottom: 30px;">
-                <div class="card-stat" style="border-left: 4px solid var(--success);">
-                    <div class="stat-label">Taux de Réussite</div>
-                    <div class="stat-number">84%</div>
-                </div>
-                <div class="card-stat" style="border-left: 4px solid var(--danger);">
-                    <div class="stat-label">Taux d'Abandon</div>
-                    <div class="stat-number">3.2%</div>
-                </div>
-                <div class="card-stat" style="border-left: 4px solid var(--primary);">
-                    <div class="stat-label">Diplômes Émis</div>
-                    <div class="stat-number">142</div>
-                </div>
-            </div>
-
-            <div class="content-panel">
-                <div class="panel-header">
-                    <h3>Palmarès de l'Année Sélectionnée</h3>
-                    <button onclick="exporterArchives()" style="background: #e2e8f0; border: none; padding: 8px 15px; border-radius: 6px; font-size: 12px; font-weight: 700; cursor: pointer;">
-                        <i class="fa-solid fa-file-pdf"></i> EXPORTER EN PDF
-                    </button>
-                </div>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Nom & Postnom</th>
-                            <th>Option</th>
-                            <th>Moyenne Finale</th>
-                            <th>Mention</th>
-                            <th>Action</th>
-                        </tr>
-                    </thead>
-                    <tbody id="archives-body">
-                        <tr>
-                            <td>KABAMBA MUKADI Jean</td>
-                            <td>Électricité</td>
-                            <td>72.5%</td>
-                            <td><span class="badge-status status-success">Distinction</span></td>
-                            <td><i class="fa-solid fa-download" style="color: var(--accent); cursor:pointer;"></i></td>
-                        </tr>
-                        <tr>
-                            <td>MBUYI TSHIOLA Sarah</td>
-                            <td>Commerciale</td>
-                            <td>61.2%</td>
-                            <td><span class="badge-status status-success">Satisfaction</span></td>
-                            <td><i class="fa-solid fa-download" style="color: var(--accent); cursor:pointer;"></i></td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
-        <style>
-            .modal-archive {
-                position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
-                background: white; padding: 40px; border-radius: 30px; z-index: 2000;
-                box-shadow: 0 0 100px rgba(0,0,0,0.5); display: none; width: 500px;
-            }
-            .overlay {
-                position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-                background: rgba(0,0,0,0.7); z-index: 1999; display: none;
-            }
-        </style>
-
-        <div class="overlay" id="archive-overlay"></div>
-        <div class="modal-archive" id="modal-export">
-            <h2 style="margin-bottom: 20px; color: var(--primary);">Génération du Rapport</h2>
-            <p style="color: var(--text-gray); margin-bottom: 25px;">Le système prépare le palmarès global au format PDF. Cela peut prendre quelques secondes.</p>
-            <div style="width: 100%; background: #f1f5f9; height: 10px; border-radius: 5px; overflow: hidden;">
-                <div id="progress-bar" style="width: 0%; height: 100%; background: var(--accent); transition: width 0.3s;"></div>
-            </div>
-            <button onclick="fermerModal()" style="margin-top: 25px; width: 100%; padding: 12px; border: none; background: var(--primary); color: white; border-radius: 10px; cursor: pointer;">OK</button>
-        </div>
-        
+        </section>
     </main>
-
-    <script>
+        <script>
+        // --- CONFIGURATION SUPABASE ---
         const SUPABASE_URL = "https://chpydetdbfugwwhsvgin.supabase.co"; 
         const SUPABASE_KEY = "sb_publishable_G3rNGdnIihPNVfaLj1C4VQ_1TUBFh_z"; 
         const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
+        let charts = {};
+        let currentSections = ["Génie Électrique", "Commerciale", "Scientifique"];
+
+        // --- MOTEUR DE NAVIGATION ---
         function switchTab(viewId, element) {
             document.querySelectorAll('.tab-view').forEach(v => v.style.display = 'none');
             document.getElementById('view-' + viewId).style.display = 'block';
             document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
             element.classList.add('active');
-            
-            if(viewId === 'profs') loadProfs();
-            if(viewId === 'eleves') loadEleves();
-            if(viewId === 'general') loadGlobalStats();
-                // 1. Cache toutes les vues pour faire place à la nouvelle
-    document.querySelectorAll('.tab-view').forEach(v => v.style.display = 'none');
-    
-    // 2. Affiche la vue spécifique demandée
-    const selectedView = document.getElementById('view-' + viewId);
-    if(selectedView) selectedView.style.display = 'block';
 
-    // 3. Gère l'apparence du menu (met en Or le bouton cliqué)
-    document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
-    element.classList.add('active');
-    
-    // 4. DÉCLENCHEURS DE CHARGEMENT (Très important)
-    if(viewId === 'profs') chargerPerformanceProfs();
-    if(viewId === 'eleves') fetchEleves();
-    if(viewId === 'general') loadGlobalStats();
-    if(viewId === 'archives') loadArchives();
-    if(viewId === 'finances') loadFinances();
-                // 1. Cache toutes les vues pour faire place à la nouvelle
-    document.querySelectorAll('.tab-view').forEach(v => v.style.display = 'none');
-    
-    // 2. Affiche la vue spécifique demandée
-    const selectedView = document.getElementById('view-' + viewId);
-    if(selectedView) selectedView.style.display = 'block';
-
-    // 3. Gère l'apparence du menu (met en Or le bouton cliqué)
-    document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
-    element.classList.add('active');
-    
-    // 4. DÉCLENCHEURS DE CHARGEMENT (Très important)
-    if(viewId === 'profs') chargerPerformanceProfs();
-    if(viewId === 'eleves') fetchEleves();
-    if(viewId === 'general') loadGlobalStats();
-    if(viewId === 'archives') loadArchives();
-    if(viewId === 'finances') loadFinances();
-            function switchTab(viewId, element) {
-    document.querySelectorAll('.tab-view').forEach(v => v.style.display = 'none');
-    
-    const selectedView = document.getElementById('view-' + viewId);
-    if(selectedView) selectedView.style.display = 'block';
-
-    document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
-    element.classList.add('active');
-    
-    if(viewId === 'profs') chargerPerformanceProfs();
-    if(viewId === 'eleves') fetchEleves();
-    if(viewId === 'general') loadGlobalStats();
-    if(viewId === 'archives') loadArchives();
-    if(viewId === 'finances') loadFinances();
-            
-    
-            
+            // Déclencheurs de données
+            if(viewId === 'general') { loadGlobalStats(); initMainChart(); }
+            if(viewId === 'discipline') initDisciplineRadar();
+            if(viewId === 'planning') { renderSectionsUI(); initSectionsChart(); }
+            if(viewId === 'eleves') loadElevesData();
+            if(viewId === 'finances') loadFinancesData();
         }
 
+        // --- GRAPH 1 : FINANCES (LIGNE) ---
+        function initMainChart() {
+            const ctx = document.getElementById('mainChart').getContext('2d');
+            if(charts.main) charts.main.destroy();
+            charts.main = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin'],
+                    datasets: [{
+                        data: [5000, 7200, 6800, 9500, 8400, 12000],
+                        borderColor: '#B45309',
+                        backgroundColor: 'rgba(180, 83, 9, 0.1)',
+                        borderWidth: 4, tension: 0.4, fill: true
+                    }]
+                },
+                options: { plugins: { legend: { display: false } }, scales: { y: { grid: { color: 'rgba(255,255,255,0.05)' } } } }
+            });
+        }
+
+        // --- GRAPH 2 : DISCIPLINE (RADAR) ---
+        function initDisciplineRadar() {
+            const ctx = document.getElementById('disciplineRadar').getContext('2d');
+            if(charts.radar) charts.radar.destroy();
+            charts.radar = new Chart(ctx, {
+                type: 'radar',
+                data: {
+                    labels: ['Ponctualité', 'Uniforme', 'Résultats', 'Respect', 'Participation'],
+                    datasets: [{
+                        data: [80, 95, 70, 85, 90],
+                        backgroundColor: 'rgba(180, 83, 9, 0.2)',
+                        borderColor: '#B45309',
+                        pointBackgroundColor: '#B45309'
+                    }]
+                },
+                options: { 
+                    scales: { r: { grid: { color: 'rgba(255,255,255,0.1)' }, angleLines: { color: 'rgba(255,255,255,0.1)' } } },
+                    plugins: { legend: { display: false } }
+                }
+            });
+        }
+
+        // --- GESTION DES FILIÈRES DYNAMIQUES ---
+        function renderSectionsUI() {
+            const box = document.getElementById('sections-box');
+            box.innerHTML = currentSections.map(s => `
+                <div class="section-pill">${s} <i class="fa-solid fa-circle-xmark" onclick="removeSectionUI('${s}')" style="cursor:pointer"></i></div>
+            `).join('');
+        }
+
+        function addSectionUI() {
+            const n = prompt("Nom de la filière :");
+            if(n) { currentSections.push(n); renderSectionsUI(); initSectionsChart(); }
+        }
+
+        function removeSectionUI(n) {
+            currentSections = currentSections.filter(x => x !== n);
+            renderSectionsUI(); initSectionsChart();
+        }
+
+        function initSectionsChart() {
+            const ctx = document.getElementById('sectionsBarChart').getContext('2d');
+            if(charts.bar) charts.bar.destroy();
+            charts.bar = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: currentSections,
+                    datasets: [{
+                        data: currentSections.map(() => Math.floor(Math.random() * 40) + 60),
+                        backgroundColor: '#B45309'
+                    }]
+                },
+                options: { plugins: { legend: { display: false } } }
+            });
+        }
+
+        // --- SYNC SUPABASE : STATS ---
         async function loadGlobalStats() {
             const { count } = await supabase.from('eleves').select('*', { count: 'exact', head: true });
             document.getElementById('val-eleves').innerText = count || 0;
-            
-            const { data: fin } = await supabase.from('finances').select('montant_paye');
-            const total = fin ? fin.reduce((s, i) => s + i.montant_paye, 0) : 0;
-            document.getElementById('val-finance').innerText = total + " $";
+            const { data } = await supabase.from('finances').select('montant_paye');
+            const total = data ? data.reduce((s, i) => s + i.montant_paye, 0) : 0;
+            document.getElementById('val-finance').innerText = total.toLocaleString() + " $";
         }
 
-        async function loadProfs() {
-            const container = document.getElementById('prof-list-container');
-            container.innerHTML = "Analyse des performances...";
-            const { data } = await supabase.from('professeurs').select('*');
-            container.innerHTML = "";
-            data.forEach(p => {
-                const score = Math.max(0, 100 - (p.heures_absent * 5));
-                container.innerHTML += `
-                    <div class="prof-widget">
-                        <div class="prof-info">
-                            <div class="prof-img"><i class="fa-solid fa-user-tie"></i></div>
-                            <div><strong>${p.nom_complet}</strong><br><small>${p.grade_direction}</small></div>
-                        </div>
-                        <div class="perf-track"><div class="perf-bar" style="width:${score}%"></div></div>
-                        <div style="display:flex; justify-content:space-between; font-size:12px;">
-                            <span>Assiduité : ${score}%</span>
-                            <span>Absences : ${p.heures_absent}h</span>
-                        </div>
-                    </div>`;
-            });
-        }
-
-        async function loadEleves() {
+        // --- SYNC SUPABASE : ELEVES & BADGES ---
+        async function loadElevesData() {
             const { data } = await supabase.from('eleves').select('*');
-            const body = document.getElementById('eleves-body');
-            body.innerHTML = "";
+            const b = document.getElementById('eleves-list-body'); b.innerHTML = "";
             data.forEach(e => {
-                body.innerHTML += `
-                    <tr>
-                        <td><b>${e.matricule}</b></td>
-                        <td>${e.nom} ${e.postnom}</td>
-                        <td>3e Électricité</td>
-                        <td><span class="badge-status ${e.statut_discipline === 'VERT' ? 'status-success' : 'status-danger'}">${e.statut_discipline}</span></td>
-                        <td><button style="background:none; border:none; color:var(--accent); cursor:pointer;"><i class="fa-solid fa-ellipsis-vertical"></i></button></td>
-                    </tr>`;
+                b.innerHTML += `<tr onclick="generateBadge('${e.matricule}', '${e.nom}', '${e.postnom}')" style="cursor:pointer">
+                    <td><span class="status-badge" style="background:#1e293b; color:var(--gold-bright)">${e.matricule}</span></td>
+                    <td><b>${e.nom} ${e.postnom}</b></td>
+                    <td><i class="fa-solid fa-chevron-right" style="color:var(--accent-gold)"></i></td>
+                </tr>`;
             });
         }
 
-        // Auto-load
-        window.onload = loadGlobalStats;
+        function generateBadge(mat, nom, post) {
+            const box = document.getElementById('badge-display');
+            box.innerHTML = `
+                <div class="id-card-visual">
+                    <div style="display:flex; gap:25px; align-items:center">
+                        <div style="width:90px; height:90px; background:#1e293b; border:2px solid var(--accent-gold); border-radius:15px; display:flex; align-items:center; justify-content:center; font-size:40px; color:var(--accent-gold)">
+                            <i class="fa-solid fa-user-tie"></i>
+                        </div>
+                        <div>
+                            <p style="font-size:9px; color:var(--accent-gold); letter-spacing:2px">PLATINUM ID : ${mat}</p>
+                            <h2 style="margin:5px 0; font-size:20px">${nom} ${post}</h2>
+                            <p style="font-size:11px; color:var(--text-dim)">Option Électricité | 2024-2025</p>
+                        </div>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-top:35px">
+                        <div id="qr-target" style="background:#fff; padding:5px; border-radius:8px"></div>
+                        <div style="text-align:right">
+                            <p style="font-size:8px; color:var(--accent-gold)">LE PROMOTEUR</p>
+                            <div style="width:120px; height:1px; background:var(--accent-gold); margin-top:5px"></div>
+                        </div>
+                    </div>
+                </div>
+                <button onclick="window.print()" style="width:100%; background:var(--accent-gold); border:none; padding:15px; border-radius:12px; font-weight:900; cursor:pointer; color:#000">IMPRIMER LE BADGE</button>
+            `;
+            new QRCode(document.getElementById("qr-target"), { text: mat, width: 60, height: 60 });
+        }
+
+        // --- SYNC SUPABASE : FINANCES ---
+        async function loadFinancesData() {
+            const { data } = await supabase.from('finances').select('*').order('date_paiement', {ascending:false});
+            const b = document.getElementById('fin-body'); b.innerHTML = "";
+            data.forEach(f => {
+                b.innerHTML += `<tr>
+                    <td><small>#${f.id}</small></td>
+                    <td><b>${f.nom_eleve}</b></td>
+                    <td>${f.motif_paiement}</td>
+                    <td style="color:var(--success); font-weight:800">+ ${f.montant_paye} $</td>
+                    <td>${new Date(f.date_paiement).toLocaleDateString()}</td>
+                </tr>`;
+            });
+        }
+
+        window.onload = () => { loadGlobalStats(); initMainChart(); };
     </script>
 </body>
-    </html>
-    
+</html>
