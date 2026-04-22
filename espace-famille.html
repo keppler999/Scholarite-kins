@@ -23,38 +23,33 @@
         * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); padding-bottom: 90px; }
 
-        /* --- HEADER & PROFIL --- */
+        /* --- HEADER --- */
         .header { background: linear-gradient(135deg, #064E3B 0%, #10B981 100%); color: white; padding: 30px 20px; border-radius: 0 0 40px 40px; }
         .profile-section { display: flex; align-items: center; gap: 20px; }
-        .avatar { width: 65px; height: 65px; border-radius: 20px; border: 3px solid rgba(255,255,255,0.3); }
+        .avatar { width: 60px; height: 60px; border-radius: 18px; border: 2px solid rgba(255,255,255,0.4); object-fit: cover; }
 
-        /* --- ALERTES --- */
-        .notification-bar { margin: -20px 20px 20px; background: white; padding: 18px; border-radius: 20px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.05); display: flex; align-items: center; gap: 15px; border-left: 5px solid var(--warning); display: none; }
+        /* --- ALERTE --- */
+        .notification-bar { margin: -20px 20px 20px; background: white; padding: 18px; border-radius: 20px; box-shadow: 0 10px 20px rgba(0,0,0,0.05); display: none; align-items: center; gap: 15px; border-left: 5px solid var(--warning); }
 
         .container { padding: 0 20px; }
-        .section-title { margin: 25px 0 15px; font-size: 13px; font-weight: 800; color: #64748B; text-transform: uppercase; letter-spacing: 1px; }
+        .section-title { margin: 25px 0 12px; font-size: 11px; font-weight: 800; color: #94A3B8; text-transform: uppercase; letter-spacing: 1px; }
 
         .card { background: var(--card); border-radius: 24px; padding: 20px; border: 1px solid #E2E8F0; margin-bottom: 15px; }
 
         /* --- FINANCES --- */
-        .finance-status { display: flex; justify-content: space-between; align-items: center; }
-        .progress-container { height: 12px; background: #E2E8F0; border-radius: 6px; margin: 15px 0; overflow: hidden; }
-        .progress-bar { height: 100%; background: var(--family-green); width: 0%; transition: 1s ease-in-out; }
+        .progress-container { height: 10px; background: #E2E8F0; border-radius: 5px; margin: 15px 0; overflow: hidden; }
+        .progress-bar { height: 100%; background: var(--family-green); width: 0%; transition: 1.5s cubic-bezier(0.1, 0, 0.3, 1); }
 
-        .quick-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; }
-        .grid-item { background: white; padding: 20px; border-radius: 24px; text-align: center; border: 1px solid #E2E8F0; cursor: pointer; }
-        .grid-item i { font-size: 24px; color: var(--family-green); margin-bottom: 10px; }
-
-        .stats-row { display: flex; gap: 10px; }
-        .stat-box { flex: 1; padding: 15px; border-radius: 18px; text-align: center; }
+        .stats-row { display: flex; gap: 12px; margin-top: 20px; }
+        .stat-box { flex: 1; padding: 15px; border-radius: 20px; text-align: center; }
         .stat-absent { background: #FEE2E2; color: var(--danger); }
         .stat-conduct { background: #ECFDF5; color: var(--family-green); }
 
         /* --- BOTTOM NAV --- */
-        .bottom-nav { position: fixed; bottom: 0; width: 100%; background: white; border-top: 1px solid #E2E8F0; display: flex; justify-content: space-around; padding: 12px 0; z-index: 100; }
-        .nav-link { text-align: center; color: #94A3B8; text-decoration: none; font-size: 11px; font-weight: 700; cursor: pointer; }
+        .bottom-nav { position: fixed; bottom: 0; width: 100%; background: white; border-top: 1px solid #E2E8F0; display: flex; justify-content: space-around; padding: 15px 0; z-index: 100; }
+        .nav-link { text-align: center; color: #94A3B8; text-decoration: none; font-size: 10px; font-weight: 700; }
         .nav-link.active { color: var(--family-green); }
-        .nav-link i { font-size: 22px; display: block; margin-bottom: 4px; }
+        .nav-link i { font-size: 20px; display: block; margin-bottom: 4px; }
     </style>
 </head>
 <body>
@@ -63,146 +58,154 @@
         <div class="profile-section">
             <img id="child-avatar" src="https://ui-avatars.com/api/?name=Eleve&background=fff&color=10B981" class="avatar">
             <div>
-                <h2 id="child-name" style="font-size: 18px;">Chargement...</h2>
-                <p id="child-class" style="font-size: 12px; opacity: 0.9;">Matricule : ...</p>
+                <h2 id="child-name" style="font-size: 17px; letter-spacing: -0.5px;">Chargement...</h2>
+                <p id="child-class" style="font-size: 11px; opacity: 0.8;">Vérification de la classe...</p>
             </div>
         </div>
     </header>
 
     <div id="alert-box" class="notification-bar">
-        <i class="fa-solid fa-circle-exclamation" style="color: var(--warning); font-size: 24px;"></i>
+        <i class="fa-solid fa-triangle-exclamation" style="color: var(--warning); font-size: 20px;"></i>
         <div>
-            <p style="font-size: 13px; font-weight: 700;">Rappel de paiement</p>
-            <p id="alert-text" style="font-size: 11px; color: #64748B;">Solder la tranche en cours.</p>
+            <p style="font-size: 12px; font-weight: 800;">Avis de la comptabilité</p>
+            <p id="alert-text" style="font-size: 11px; color: #64748B;">Merci de régulariser la tranche en cours.</p>
         </div>
     </div>
 
     <div class="container">
         <div class="stats-row">
             <div class="stat-box stat-absent">
-                <h3 id="absences-count" style="font-size: 20px;">0</h3>
-                <small>Absences</small>
+                <h3 id="absences-count">0</h3>
+                <small style="font-size: 10px; font-weight: 700;">Absences</small>
             </div>
             <div class="stat-box stat-conduct">
-                <h3 id="conduct-grade" style="font-size: 20px;">A</h3>
-                <small>Conduite</small>
+                <h3 id="conduct-grade">A</h3>
+                <small style="font-size: 10px; font-weight: 700;">Conduite</small>
             </div>
         </div>
 
-        <h3 class="section-title">Suivi Financier</h3>
+        <h3 class="section-title">Trésorerie Élève</h3>
         <div class="card">
-            <div class="finance-status">
-                <span style="font-weight: 700;">Frais Scolaires</span>
-                <span id="payment-text" style="color: var(--family-green); font-weight: 800;">0 / 0 $</span>
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <span style="font-size: 13px; font-weight: 700;">Scolarité</span>
+                <span id="payment-text" style="color: var(--family-green); font-weight: 800; font-size: 14px;">0 / 0 $</span>
             </div>
             <div class="progress-container">
                 <div id="payment-bar" class="progress-bar"></div>
             </div>
-            <p id="payment-footer" style="font-size: 11px; color: #64748B;">Mise à jour en temps réel</p>
+            <p id="payment-footer" style="font-size: 10px; color: #94A3B8;">Synchronisé avec la caisse centrale</p>
         </div>
 
-        <h3 class="section-title">Dernières Notes</h3>
+        <h3 class="section-title">Performances Récentes</h3>
         <div id="notes-container" class="card">
-            <p style="font-size: 12px; color: #64748B; text-align: center;">Aucune note publiée pour le moment.</p>
+            <p style="font-size: 11px; color: #94A3B8; text-align: center; padding: 10px;">Aucune note publiée cette semaine.</p>
         </div>
 
-        <h3 class="section-title">Menu Rapide</h3>
-        <div class="quick-grid">
-            <div class="grid-item" onclick="alert('Bientôt disponible : Téléchargement PDF')">
-                <i class="fa-solid fa-file-pdf"></i>
-                <p style="font-size: 11px; font-weight: 700;">Bulletins</p>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 30px;">
+            <div class="card" style="margin-bottom: 0; text-align: center; padding: 15px;" onclick="window.location.reload()">
+                <i class="fa-solid fa-rotate" style="color: var(--family-green); margin-bottom: 8px;"></i>
+                <p style="font-size: 11px; font-weight: 700;">Actualiser</p>
             </div>
-            <div class="grid-item" onclick="handleLogout()">
-                <i class="fa-solid fa-power-off" style="color: var(--danger);"></i>
+            <div class="card" style="margin-bottom: 0; text-align: center; padding: 15px; border-color: #fee2e2;" onclick="handleLogout()">
+                <i class="fa-solid fa-power-off" style="color: var(--danger); margin-bottom: 8px;"></i>
                 <p style="font-size: 11px; font-weight: 700;">Déconnexion</p>
             </div>
         </div>
     </div>
 
     <nav class="bottom-nav">
-        <a class="nav-link active"><i class="fa-solid fa-house"></i>Accueil</a>
-        <a class="nav-link"><i class="fa-solid fa-chart-line"></i>Notes</a>
-        <a class="nav-link"><i class="fa-solid fa-wallet"></i>Frais</a>
-        <a class="nav-link" onclick="window.location.href='mailto:direction@ecole.com'"><i class="fa-solid fa-envelope"></i>Contact</a>
+        <div class="nav-link active"><i class="fa-solid fa-house-user"></i>Accueil</div>
+        <div class="nav-link"><i class="fa-solid fa-award"></i>Cotes</div>
+        <div class="nav-link"><i class="fa-solid fa-money-bill-transfer"></i>Paiements</div>
+        <div class="nav-link"><i class="fa-solid fa-comment-dots"></i>Contact</div>
     </nav>
 
     <script>
-        // CONFIGURATION SUPABASE
+        // --- CONNEXION CONFIGURÉE ---
         const SUPABASE_URL = "https://chpydetdbfugwwhsvgin.supabase.co"; 
         const SUPABASE_KEY = "sb_publishable_G3rNGdnIihPNVfaLj1C4VQ_1TUBFh_z"; 
-        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        async function loadParentDashboard() {
-            // 1. Obtenir l'utilisateur connecté
-            const { data: { user } } = await supabase.auth.getUser();
+        async function initParentPortal() {
+            // 1. Récupérer la session
+            const { data: { user } } = await _supabase.auth.getUser();
             if (!user) {
-                window.location.href = 'index.html';
+                window.location.href = 'index.html'; // Redirection si non connecté
                 return;
             }
 
-            // 2. Récupérer l'élève lié (On cherche par le téléphone du parent ou email)
-            // Note: Dans ta DB, assure-toi d'avoir un lien entre Parent et Elève
-            const { data: student, error } = await supabase
-                .from('students')
-                .select('*, classes(name)')
-                .eq('parent_phone', user.phone || user.email) 
+            // 2. Chercher l'élève lié par l'email du parent
+            const { data: student, error } = await _supabase
+                .from('eleves')
+                .select('*, classes(nom)')
+                .eq('email_parent', user.email) 
                 .single();
 
             if (student) {
-                document.getElementById('child-name').innerText = student.full_name;
-                document.getElementById('child-class').innerText = `${student.classes.name} | Mat: ${student.matricule}`;
-                document.getElementById('child-avatar').src = `https://ui-avatars.com/api/?name=${student.full_name.replace(' ', '+')}&background=fff&color=10B981`;
+                // Mise à jour de l'UI
+                document.getElementById('child-name').innerText = `${student.nom} ${student.postnom}`;
+                document.getElementById('child-class').innerText = `${student.classes.nom} | Mat: ${student.matricule}`;
+                document.getElementById('child-avatar').src = `https://ui-avatars.com/api/?name=${student.nom}+${student.postnom}&background=fff&color=10B981`;
 
-                loadFinances(student.id);
-                loadGrades(student.id);
+                loadFinanceData(student.nom + " " + student.postnom); // Basé sur ton schéma finances
+                loadGradesData(student.id);
+            } else {
+                document.getElementById('child-name').innerText = "Élève non trouvé";
+                document.getElementById('child-class').innerText = "Veuillez contacter le secrétariat.";
             }
         }
 
-        async function loadFinances(studentId) {
-            // On calcule le total payé
-            const { data: payments } = await supabase
-                .from('payments')
-                .select('amount')
-                .eq('student_id', studentId);
+        async function loadFinanceData(studentFullName) {
+            // On cherche dans la table finances
+            const { data: payments } = await _supabase
+                .from('finances')
+                .select('montant_paye')
+                .eq('nom_eleve', studentFullName);
 
-            const totalPaid = payments ? payments.reduce((acc, p) => acc + parseFloat(p.amount), 0) : 0;
-            const totalRequired = 450; // Montant fixe annuel (exemple)
-            const percent = (totalPaid / totalRequired) * 100;
+            const totalPaid = payments ? payments.reduce((acc, p) => acc + parseFloat(p.montant_paye), 0) : 0;
+            const totalRequired = 550; // Montant exemple annuel au Collège Maranatha
+            const percent = Math.min((totalPaid / totalRequired) * 100, 100);
 
             document.getElementById('payment-text').innerText = `${totalPaid} / ${totalRequired} $`;
             document.getElementById('payment-bar').style.width = percent + '%';
             
+            // Alerte si moins de 50% payé
             if (percent < 50) {
                 document.getElementById('alert-box').style.display = 'flex';
-                document.getElementById('payment-footer').innerText = `Reste à payer : ${totalRequired - totalPaid} $`;
+                document.getElementById('payment-footer').innerText = `Attention : Solde restant ${totalRequired - totalPaid} $`;
+                document.getElementById('payment-footer').style.color = 'var(--danger)';
             }
         }
 
-        async function loadGrades(studentId) {
-            const { data: grades } = await supabase
-                .from('grades')
-                .select('*')
-                .eq('student_id', studentId)
-                .order('created_at', { ascending: false })
-                .limit(3);
+        async function loadGradesData(studentId) {
+            // Chercher les dernières notes
+            const { data: notes } = await _supabase
+                .from('notes')
+                .select('valeur_note, matiere')
+                .eq('eleve_id', studentId)
+                .limit(4);
 
-            if (grades && grades.length > 0) {
+            if (notes && notes.length > 0) {
                 const container = document.getElementById('notes-container');
-                container.innerHTML = grades.map(g => `
-                    <div style="display: flex; justify-content: space-between; margin-bottom: 12px; border-bottom: 1px solid #f1f1f1; padding-bottom: 8px;">
-                        <span style="font-size: 13px;">${g.subject || 'Examen'}</span>
-                        <b style="color: ${g.score >= 10 ? 'var(--family-green)' : 'var(--danger)'};">${g.score}/20</b>
+                container.innerHTML = notes.map(n => `
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px solid #F1F5F9;">
+                        <span style="font-size: 13px; font-weight: 600;">${n.matiere || 'Évaluation'}</span>
+                        <span style="background: ${n.valeur_note >= 10 ? '#ECFDF5' : '#FEE2E2'}; 
+                                     color: ${n.valeur_note >= 10 ? 'var(--family-green)' : 'var(--danger)'}; 
+                                     padding: 4px 12px; border-radius: 10px; font-weight: 800; font-size: 12px;">
+                            ${n.valeur_note}/20
+                        </span>
                     </div>
                 `).join('');
             }
         }
 
         async function handleLogout() {
-            await supabase.auth.signOut();
+            await _supabase.auth.signOut();
             window.location.href = 'index.html';
         }
 
-        window.onload = loadParentDashboard;
+        window.onload = initParentPortal;
     </script>
 </body>
 </html>
