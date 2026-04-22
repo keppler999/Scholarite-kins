@@ -26,7 +26,7 @@
 
         /* --- SIDEBAR --- */
         .sidebar {
-            width: 300px; background: #000; border-right: 1px solid var(--border);
+            width: 280px; background: #000; border-right: 1px solid var(--border);
             padding: 30px; display: flex; flex-direction: column;
         }
         .nav-group { margin-bottom: 30px; }
@@ -44,124 +44,128 @@
         /* --- TOP BAR --- */
         .top-bar { display: flex; justify-content: space-between; align-items: flex-start; }
         .session-info { background: var(--panel); padding: 15px 25px; border-radius: 18px; border: 1px solid var(--border); display: flex; gap: 20px; }
-        .info-pill { font-size: 12px; color: #94A3B8; border-right: 1px solid var(--border); padding-right: 20px; }
+        .info-pill { font-size: 11px; color: #94A3B8; border-right: 1px solid var(--border); padding-right: 20px; text-transform: uppercase; }
+        .info-pill b { color: white; display: block; font-size: 14px; text-transform: none; margin-top: 4px; }
         .info-pill:last-child { border: none; }
-        .info-pill b { color: white; display: block; font-size: 14px; }
 
         /* --- WORKSPACE --- */
-        .workspace-grid { display: grid; grid-template-columns: 1fr 350px; gap: 30px; }
-        .glass-card { background: var(--panel); border-radius: 28px; border: 1px solid var(--border); padding: 30px; position: relative; }
+        .workspace-grid { display: grid; grid-template-columns: 1fr 320px; gap: 30px; }
+        .glass-card { background: var(--panel); border-radius: 28px; border: 1px solid var(--border); padding: 30px; }
 
         /* --- TABS --- */
-        .tabs { display: flex; gap: 10px; margin-bottom: 25px; background: rgba(0,0,0,0.2); padding: 5px; border-radius: 12px; }
-        .tab { padding: 10px 20px; border-radius: 8px; cursor: pointer; font-size: 13px; font-weight: 600; color: #64748B; transition: 0.3s; }
-        .tab.active { background: var(--primary); color: white; }
+        .tabs { display: flex; gap: 8px; margin-bottom: 25px; background: rgba(0,0,0,0.3); padding: 6px; border-radius: 14px; width: fit-content; }
+        .tab { padding: 10px 18px; border-radius: 10px; cursor: pointer; font-size: 13px; font-weight: 600; color: #64748B; transition: 0.3s; }
+        .tab.active { background: var(--primary); color: white; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3); }
 
         /* --- TABLE --- */
         table { width: 100%; border-collapse: collapse; }
-        th { text-align: left; padding: 12px; color: #64748B; font-size: 11px; border-bottom: 1px solid var(--border); }
-        td { padding: 15px 12px; border-bottom: 1px solid rgba(255,255,255,0.02); }
+        th { text-align: left; padding: 12px; color: #64748B; font-size: 11px; text-transform: uppercase; border-bottom: 1px solid var(--border); }
+        td { padding: 15px 12px; border-bottom: 1px solid rgba(255,255,255,0.02); font-size: 14px; }
 
         /* --- INPUTS --- */
-        .cote-box { width: 55px; height: 35px; background: #000; border: 1px solid #1E293B; border-radius: 8px; color: var(--primary); text-align: center; font-family: 'JetBrains Mono'; font-weight: 700; }
-        .check-presence { width: 18px; height: 18px; accent-color: var(--success); cursor: pointer; }
+        .cote-box { width: 60px; height: 38px; background: #000; border: 1px solid #1E293B; border-radius: 10px; color: var(--primary); text-align: center; font-family: 'JetBrains Mono'; font-weight: 700; outline: none; transition: 0.3s; }
+        .cote-box:focus { border-color: var(--primary); box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2); }
+        .check-presence { width: 20px; height: 20px; accent-color: var(--success); cursor: pointer; }
+
+        .btn-sync { background: var(--primary); color: white; border: none; padding: 12px 20px; border-radius: 12px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 10px; transition: 0.3s; }
+        .btn-sync:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(59, 130, 246, 0.4); }
 
         /* --- JOURNAL --- */
-        .editor-area { width: 100%; background: #000; border: 1px solid #1E293B; border-radius: 15px; color: white; padding: 20px; font-family: inherit; margin-bottom: 15px; resize: none; }
+        .editor-area { width: 100%; background: #000; border: 1px solid #1E293B; border-radius: 15px; color: white; padding: 15px; font-family: inherit; font-size: 13px; margin-bottom: 15px; resize: none; min-height: 100px; }
     </style>
 </head>
 <body>
 
     <aside class="sidebar">
         <div style="margin-bottom: 40px; display: flex; align-items: center; gap: 15px;">
-            <div style="width: 45px; height: 45px; background: var(--primary); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-weight: 900;">P</div>
-            <div><h2 style="font-size: 16px;">PLATINUM Prof</h2><small style="color: var(--success)">● En ligne</small></div>
+            <div id="prof-logo" style="width: 45px; height: 45px; background: var(--primary); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 20px;">K</div>
+            <div>
+                <h2 style="font-size: 16px; letter-spacing: 0.5px;">PLATINUM Prof</h2>
+                <small id="prof-status" style="color: var(--success)">● Session Active</small>
+            </div>
         </div>
 
         <div class="nav-group">
-            <span class="nav-label">Académique</span>
-            <div class="nav-link active"><i class="fa-solid fa-graduation-cap"></i> Mes Classes</div>
-            <div class="nav-link"><i class="fa-solid fa-clipboard-list"></i> Évaluations</div>
-            <div class="nav-link"><i class="fa-solid fa-calendar-check"></i> Appel du jour</div>
+            <span class="nav-label">Enseignement</span>
+            <div class="nav-link active"><i class="fa-solid fa-layer-group"></i> Mes Classes</div>
+            <div class="nav-link"><i class="fa-solid fa-book-open"></i> Cahier de Textes</div>
+            <div class="nav-link"><i class="fa-solid fa-chart-line"></i> Statistiques</div>
         </div>
 
         <div class="nav-group">
-            <span class="nav-label">Ressources</span>
-            <div class="nav-link"><i class="fa-solid fa-folder-open"></i> Supports de cours</div>
-            <div class="nav-link"><i class="fa-solid fa-message"></i> Messagerie</div>
+            <span class="nav-label">Communication</span>
+            <div class="nav-link"><i class="fa-solid fa-envelope"></i> Messages <span style="background:var(--danger); font-size:9px; padding:2px 6px; border-radius:10px; margin-left:auto; color:white">2</span></div>
+            <div class="nav-link"><i class="fa-solid fa-bullhorn"></i> Avis Direction</div>
         </div>
 
-        <div style="margin-top: auto; background: var(--panel); padding: 20px; border-radius: 20px; border: 1px solid var(--accent);">
-            <h4 style="color: var(--accent); font-size: 12px;"><i class="fa-solid fa-triangle-exclamation"></i> Rappel Discipline</h4>
-            <p style="font-size: 11px; color: #94A3B8; margin-top: 8px;">3 élèves de votre classe sont en attente de régularisation financière.</p>
+        <div style="margin-top: auto; background: rgba(180, 83, 9, 0.1); padding: 20px; border-radius: 20px; border: 1px solid rgba(180, 83, 9, 0.3);">
+            <h4 style="color: var(--accent); font-size: 12px;"><i class="fa-solid fa-shield-halved"></i> Rappel Discipline</h4>
+            <p style="font-size: 11px; color: #94A3B8; margin-top: 8px; line-height: 1.4;">Vérifiez le badge de Marc Kabamba (Refoulement requis par la comptabilité).</p>
         </div>
     </aside>
 
     <main class="main">
         <div class="top-bar">
             <div>
-                <h1 style="font-size: 28px; font-weight: 800;">Espace Pédagogique</h1>
-                <p style="color: #64748B;">Bienvenue, Prof. Kambale</p>
+                <h1 style="font-size: 26px; font-weight: 800;">Tableau de Bord Enseignant</h1>
+                <p style="color: #64748B;">Bienvenue, <span id="prof-name">Prof. Kambale</span></p>
             </div>
             <div class="session-info">
-                <div class="info-pill">Periode<b>1ère Période</b></div>
-                <div class="info-pill">Matière<b>Électricité Industrielle</b></div>
-                <div class="info-pill">Local<b>Labo A1</b></div>
+                <div class="info-pill">Période<b>1ère Période</b></div>
+                <div class="info-pill">Branche<b>Électricité Industrielle</b></div>
+                <div class="info-pill">Classe<b>3e Élec</b></div>
             </div>
         </div>
 
         <div class="workspace-grid">
             <section class="glass-card">
-                <div class="tabs">
-                    <div class="tab active" onclick="switchTab('notes')">Cotes & Évaluations</div>
-                    <div class="tab" onclick="switchTab('appel')">Appel & Présences</div>
-                    <div class="tab" onclick="switchTab('tp')">Suivi des TPs</div>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
+                    <div class="tabs">
+                        <div class="tab active" id="tab-notes" onclick="switchTab('notes')">Points & Cotes</div>
+                        <div class="tab" id="tab-appel" onclick="switchTab('appel')">Appel Journalier</div>
+                    </div>
+                    <button class="btn-sync" onclick="syncData()">
+                        <i class="fa-solid fa-rotate"></i> Synchroniser
+                    </button>
                 </div>
 
                 <div id="tab-content">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                        <h3 id="table-title">Registre des Points</h3>
-                        <button style="background: var(--primary); color: white; border: none; padding: 10px 20px; border-radius: 10px; font-weight: 700; cursor: pointer;">
-                            <i class="fa-solid fa-cloud-arrow-up"></i> Synchroniser
-                        </button>
-                    </div>
-                    
                     <table>
                         <thead>
-                            <tr id="table-head">
-                                <th>NOM DE L'ÉLÈVE</th>
-                                <th>INT 1 /10</th>
-                                <th>INT 2 /10</th>
-                                <th>TRAVAIL /20</th>
-                                <th>ACTION</th>
-                            </tr>
+                            <tr id="table-head"></tr>
                         </thead>
-                        <tbody id="student-data">
-                            </tbody>
+                        <tbody id="student-data"></tbody>
                     </table>
                 </div>
             </section>
 
             <aside style="display: flex; flex-direction: column; gap: 25px;">
-                <div class="glass-card" style="padding: 20px;">
-                    <h3 style="font-size: 16px; margin-bottom: 15px;">Journal de Bord</h3>
-                    <label style="font-size: 11px; color: #64748B;">MATIÈRE ENSEIGNÉE</label>
-                    <textarea class="editor-area" placeholder="Détaillez le chapitre vu aujourd'hui..."></textarea>
-                    <div style="display: flex; gap: 10px;">
-                        <input type="checkbox" id="finish"> <label for="finish" style="font-size: 12px;">Chapitre terminé</label>
+                <div class="glass-card" style="padding: 25px;">
+                    <h3 style="font-size: 15px; margin-bottom: 15px; display: flex; align-items: center; gap: 10px;">
+                        <i class="fa-solid fa-pen-nib" style="color:var(--accent)"></i> Journal de Classe
+                    </h3>
+                    <label style="font-size: 10px; color: #64748B; font-weight: 700;">MATIÈRE DU JOUR</label>
+                    <textarea class="editor-area" placeholder="Ex: Montage en parallèle des résistances..."></textarea>
+                    
+                    <div style="background: rgba(0,0,0,0.2); padding: 15px; border-radius: 12px; margin-bottom: 15px;">
+                        <label style="display: flex; align-items: center; gap: 10px; font-size: 12px; cursor: pointer;">
+                            <input type="checkbox" class="check-presence"> Chapitre Terminé
+                        </label>
                     </div>
-                    <button style="width: 100%; margin-top: 15px; padding: 12px; background: var(--accent); border: none; border-radius: 10px; color: white; font-weight: 800; cursor: pointer;">VALIDER LA SÉANCE</button>
+                    
+                    <button style="width: 100%; padding: 14px; background: var(--accent); border: none; border-radius: 12px; color: white; font-weight: 800; cursor: pointer; transition: 0.3s;">
+                        VALIDER LA SÉANCE
+                    </button>
                 </div>
 
-                <div class="glass-card" style="padding: 20px; border-color: var(--primary);">
-                    <h3 style="font-size: 16px; margin-bottom: 15px;">Horaire du Jour</h3>
-                    <div style="border-left: 2px solid var(--primary); padding-left: 15px; margin-bottom: 15px;">
-                        <p style="font-size: 12px; font-weight: 800;">08h00 - 10h00</p>
-                        <p style="font-size: 13px; color: #94A3B8;">3e Électricité - Labo</p>
-                    </div>
-                    <div style="border-left: 2px solid #1E293B; padding-left: 15px; opacity: 0.5;">
-                        <p style="font-size: 12px; font-weight: 800;">10h00 - 12h00</p>
-                        <p style="font-size: 13px; color: #94A3B8;">4e Mécanique - Théorie</p>
+                <div class="glass-card" style="padding: 25px; border-color: var(--primary);">
+                    <h3 style="font-size: 15px; margin-bottom: 15px;">Météo de Classe</h3>
+                    <div style="display: flex; align-items: center; justify-content: space-between;">
+                        <div>
+                            <p style="font-size: 11px; color: #64748B;">Moyenne Classe</p>
+                            <p style="font-size: 20px; font-weight: 800; color: var(--success);">14.2 / 20</p>
+                        </div>
+                        <i class="fa-solid fa-chart-area" style="font-size: 30px; color: rgba(59, 130, 246, 0.2);"></i>
                     </div>
                 </div>
             </aside>
@@ -169,45 +173,72 @@
     </main>
 
     <script>
-        const students = [
-            { name: "KABAMBA Marc", status: "Présent", notes: [8, 7, 14] },
-            { name: "MUKENDI Alice", status: "Absent", notes: [9, 8, 18] },
-            { name: "TSHIMANGA David", status: "Présent", notes: [4, 5, 10] },
-            { name: "BAKULU Sarah", status: "Présent", notes: [10, 9, 19] }
+        // Données d'élèves (Simulées - À synchroniser avec Supabase)
+        let students = [
+            { id: 1, name: "KABAMBA Marc", presence: true, notes: [8, 7, 15] },
+            { id: 2, name: "MUKENDI Alice", presence: false, notes: [9, 9, 18] },
+            { id: 3, name: "TSHIMANGA David", presence: true, notes: [4, 5, 10] },
+            { id: 4, name: "BAKULU Sarah", presence: true, notes: [10, 9, 19] }
         ];
 
         function switchTab(mode) {
             const tbody = document.getElementById('student-data');
             const thead = document.getElementById('table-head');
-            const title = document.getElementById('table-title');
             
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-            event.target.classList.add('active');
+            document.getElementById('tab-' + mode).classList.add('active');
 
             if(mode === 'appel') {
-                title.innerText = "Feuille de Présence";
-                thead.innerHTML = "<th>NOM DE L'ÉLÈVE</th><th>STATUT</th><th>RETARD (MIN)</th><th>OBSERVATION</th>";
+                thead.innerHTML = "<th>Nom de l'élève</th><th>Statut</th><th>Heure d'arrivée</th><th>Observation</th>";
                 tbody.innerHTML = students.map(s => `
                     <tr>
                         <td><b>${s.name}</b></td>
-                        <td><input type="checkbox" class="check-presence" ${s.status === 'Présent' ? 'checked' : ''}></td>
-                        <td><input type="number" class="cote-box" style="width:70px" placeholder="0"></td>
-                        <td><input type="text" style="background:transparent; border:none; color:white;" placeholder="..."></td>
+                        <td><input type="checkbox" class="check-presence" ${s.presence ? 'checked' : ''} onchange="updatePresence(${s.id}, this.checked)"></td>
+                        <td><input type="time" class="cote-box" style="width:100px" value="${s.presence ? '08:00' : ''}"></td>
+                        <td><input type="text" placeholder="RAS" style="background:transparent; border:none; color:#64748B; width:100%"></td>
                     </tr>
                 `).join('');
-            } else if(mode === 'notes') {
-                title.innerText = "Registre des Points";
-                thead.innerHTML = "<th>NOM DE L'ÉLÈVE</th><th>INT 1 /10</th><th>INT 2 /10</th><th>TRAVAIL /20</th><th>MOYENNE</th>";
-                tbody.innerHTML = students.map(s => `
-                    <tr>
-                        <td><b>${s.name}</b></td>
-                        <td><input type="number" class="cote-box" value="${s.notes[0]}"></td>
-                        <td><input type="number" class="cote-box" value="${s.notes[1]}"></td>
-                        <td><input type="number" class="cote-box" value="${s.notes[2]}"></td>
-                        <td style="font-weight:800; color:var(--success)">${((s.notes[0]+s.notes[1]+s.notes[2])/2).toFixed(1)}</td>
-                    </tr>
-                `).join('');
+            } else {
+                thead.innerHTML = "<th>Nom de l'élève</th><th>INT 1 /10</th><th>INT 2 /10</th><th>TP /20</th><th>Moyenne</th>";
+                tbody.innerHTML = students.map(s => {
+                    const moy = ((s.notes[0] + s.notes[1] + s.notes[2]) / 2).toFixed(1);
+                    return `
+                        <tr>
+                            <td><b>${s.name}</b></td>
+                            <td><input type="number" class="cote-box" value="${s.notes[0]}" onchange="updateNote(${s.id}, 0, this.value)"></td>
+                            <td><input type="number" class="cote-box" value="${s.notes[1]}" onchange="updateNote(${s.id}, 1, this.value)"></td>
+                            <td><input type="number" class="cote-box" value="${s.notes[2]}" onchange="updateNote(${s.id}, 2, this.value)"></td>
+                            <td style="font-weight:800; color:${moy >= 10 ? 'var(--success)' : 'var(--danger)'}">${moy}</td>
+                        </tr>
+                    `;
+                }).join('');
             }
+        }
+
+        function updateNote(id, index, value) {
+            const student = students.find(s => s.id === id);
+            student.notes[index] = parseFloat(value) || 0;
+            switchTab('notes'); // Rafraîchir pour recalculer la moyenne
+        }
+
+        function updatePresence(id, status) {
+            const student = students.find(s => s.id === id);
+            student.presence = status;
+        }
+
+        function syncData() {
+            const btn = document.querySelector('.btn-sync');
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Envoi...';
+            
+            // Simuler l'envoi à Supabase
+            setTimeout(() => {
+                btn.innerHTML = '<i class="fa-solid fa-check"></i> Synchronisé';
+                btn.style.background = 'var(--success)';
+                setTimeout(() => {
+                    btn.innerHTML = '<i class="fa-solid fa-rotate"></i> Synchroniser';
+                    btn.style.background = 'var(--primary)';
+                }, 2000);
+            }, 1500);
         }
 
         window.onload = () => switchTab('notes');
