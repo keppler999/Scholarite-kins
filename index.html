@@ -1,82 +1,115 @@
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Scholarite Platinum | Connexion Sécurisée</title>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700;900&display=swap');
+<body>
+    <div class="login-card">
+        <div class="logo-area">
+            <h1>SCHOLARITE</h1>
+            <p>Platinum Edition v2.0</p>
+        </div>
 
-        :root {
-            --accent: #B45309;
-            --bg: #020617;
+        <form id="login-form">
+            <div class="input-group">
+                <label><i class="fa-solid fa-envelope"></i> Email Professionnel</label>
+                <input type="email" id="email" class="input-field" placeholder="ex: direction@ecole.com" required>
+            </div>
+
+            <div class="input-group">
+                <label><i class="fa-solid fa-lock"></i> Mot de passe</label>
+                <input type="password" id="password" class="input-field" placeholder="••••••••" required>
+            </div>
+
+            <button type="submit" class="btn-login" id="btn-text">ACCÉDER AU SYSTÈME</button>
+        </form>
+
+        <div id="error-msg" style="color: #EF4444; font-size: 13px; margin-top: 15px; display: none;">
+            Identifiants invalides ou accès non autorisé.
+        </div>
+
+        <div class="footer-links">
+            <p>Besoin d'assistance ? <a href="#">Contactez l'administrateur</a></p>
+            <p style="margin-top: 10px; font-size: 10px; opacity: 0.5;">ID de session sécurisé par Supabase Auth</p>
+        </div>
+    </div>
+
+    <script>
+        const SUPABASE_URL = "https://chpydetdbfugwwhsvgin.supabase.co";
+        const SUPABASE_KEY = "sb_publishable_G3rNGdnIihPNVfaLj1C4VQ_1TUBFh_z";
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        const loginForm = document.getElementById('login-form');
+        const errorMsg = document.getElementById('error-msg');
+        const btnText = document.getElementById('btn-text');
+
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            btnText.innerText = "VÉRIFICATION...";
+            errorMsg.style.display = 'none';
+
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+
+            // 1. Authentification
+            const { data, error } = await supabase.auth.signInWithPassword({
+                email: email,
+                password: password,
+            });
+
+            if (error) {
+                showError(error.message);
+                return;
+            }
+
+            // 2. Récupération du profil et redirection
+            handleRedirection(data.user);
+        });
+
+        async function handleRedirection(user) {
+            // On cherche le rôle de l'utilisateur dans une table 'profiles'
+            const { data: profile, error } = await supabase
+                .from('profiles')
+                .select('role')
+                .eq('id', user.id)
+                .single();
+
+            if (error || !profile) {
+                // Si pas de profil spécifique, on vérifie si c'est un parent
+                checkIfParent(user);
+                return;
+            }
+
+            // Redirection basée sur le rôle
+            switch (profile.role) {
+                case 'promoteur':
+                    window.location.href = 'promoteur.html';
+                    break;
+                case 'discipline':
+                case 'securite':
+                    window.location.href = 'security.html';
+                    break;
+                default:
+                    showError("Rôle non reconnu.");
+            }
         }
 
-        body {
-            font-family: 'Inter', sans-serif;
-            background: var(--bg);
-            color: white;
-            height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0;
-            background-image: 
-                radial-gradient(circle at 20% 30%, rgba(180, 83, 9, 0.15) 0%, transparent 40%),
-                radial-gradient(circle at 80% 70%, rgba(30, 41, 59, 0.5) 0%, transparent 40%);
+        async function checkIfParent(user) {
+            // Logique pour vérifier si l'email correspond à un parent dans la table 'students'
+            const { data: student } = await supabase
+                .from('students')
+                .select('id')
+                .eq('parent_email', user.email)
+                .single();
+
+            if (student) {
+                window.location.href = 'parent.html';
+            } else {
+                showError("Aucun profil associé à ce compte.");
+                await supabase.auth.signOut();
+            }
         }
 
-        /* CARD DE CONNEXION EFFECT VERRE */
-        .login-card {
-            background: rgba(15, 23, 42, 0.8);
-            backdrop-filter: blur(20px);
-            padding: 50px;
-            border-radius: 32px;
-            border: 1px solid rgba(180, 83, 9, 0.3);
-            width: 100%;
-            max-width: 450px;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
-            text-align: center;
+        function showError(text) {
+            errorMsg.innerText = text;
+            errorMsg.style.display = 'block';
+            btnText.innerText = "ACCÉDER AU SYSTÈME";
         }
-
-        .logo-area { margin-bottom: 40px; }
-        .logo-area h1 { font-size: 28px; font-weight: 900; letter-spacing: 4px; color: var(--accent); margin: 0; }
-        .logo-area p { font-size: 10px; text-transform: uppercase; letter-spacing: 2px; color: #64748B; margin-top: 5px; }
-
-        .input-group { margin-bottom: 20px; text-align: left; }
-        .input-group label { display: block; font-size: 12px; color: #94A3B8; margin-bottom: 8px; margin-left: 5px; }
-        
-        .input-field {
-            width: 100%;
-            background: rgba(0, 0, 0, 0.3);
-            border: 1px solid #1E293B;
-            padding: 15px;
-            border-radius: 12px;
-            color: white;
-            font-size: 15px;
-            transition: 0.3s;
-        }
-        .input-field:focus { border-color: var(--accent); outline: none; box-shadow: 0 0 15px rgba(180, 83, 9, 0.2); }
-
-        .btn-login {
-            width: 100%;
-            background: var(--accent);
-            color: white;
-            border: none;
-            padding: 16px;
-            border-radius: 12px;
-            font-weight: 800;
-            font-size: 16px;
-            cursor: pointer;
-            margin-top: 20px;
-            transition: 0.3s;
-        }
-        .btn-login:hover { transform: translateY(-2px); box-shadow: 0 10px 20px rgba(180, 83, 9, 0.3); }
-
-        .footer-links { margin-top: 30px; font-size: 13px; color: #64748B; }
-        .footer-links a { color: var(--accent); text-decoration: none; }
-    </style>
-</head>
+    </script>
+</body>
+</html>
