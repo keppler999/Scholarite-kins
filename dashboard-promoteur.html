@@ -88,7 +88,6 @@
         .card-label { font-size: 11px; font-weight: 800; color: var(--text-dim); text-transform: uppercase; letter-spacing: 2px; }
         .card-value { font-size: 40px; font-weight: 900; margin: 15px 0; color: #fff; letter-spacing: -1px; }
 
-        /* --- MODULES SPECIFIQUES --- */
         .chart-container { background: var(--card-glass); border-radius: 30px; padding: 40px; border: 1px solid rgba(255,255,255,0.05); margin-bottom: 40px; min-height: 400px; }
         
         .id-card-visual {
@@ -134,7 +133,7 @@
             <div class="nav-link" onclick="switchTab('eleves', this)"><i class="fa-solid fa-address-card"></i><span class="nav-text">Badges & Casier</span></div>
             <div class="nav-link" onclick="switchTab('discipline', this)"><i class="fa-solid fa-shield-halved"></i><span class="nav-text">Discipline Radar</span></div>
             <div class="nav-link" onclick="switchTab('planning', this)"><i class="fa-solid fa-calendar-check"></i><span class="nav-text">Planning Filières</span></div>
-            <div class="nav-link" onclick="switchTab('profs', this)"><i class="fa-solid fa-user-tie"></i><span class="nav-text">Performance Profs</span></div>
+            <div class="nav-link" onclick="handleLogout()" style="margin-top: 50px; color: var(--danger)"><i class="fa-solid fa-power-off"></i><span class="nav-text">Quitter</span></div>
         </nav>
     </aside>
 
@@ -149,16 +148,16 @@
                 <div class="card-bank">
                     <div class="card-label">Encaissements Totaux</div>
                     <div class="card-value" id="val-finance">0 $</div>
-                    <div style="color:var(--success); font-size:12px"><i class="fa-solid fa-caret-up"></i> Flux positif</div>
+                    <div style="color:var(--success); font-size:12px"><i class="fa-solid fa-caret-up"></i> Flux réel consolidé</div>
                 </div>
                 <div class="card-bank">
                     <div class="card-label">Inscriptions Actives</div>
                     <div class="card-value" id="val-eleves">0</div>
-                    <div style="color:var(--text-dim); font-size:12px">Capacité : 85%</div>
+                    <div style="color:var(--text-dim); font-size:12px">Effectif total base</div>
                 </div>
                 <div class="card-bank">
-                    <div class="card-label">Discipline Moyenne</div>
-                    <div class="card-value">94.8%</div>
+                    <div class="card-label">Moyenne Générale</div>
+                    <div class="card-value" id="val-discipline">...</div>
                     <div style="color:var(--accent-gold); font-size:12px">Standard Platinum</div>
                 </div>
             </div>
@@ -166,47 +165,6 @@
             <div class="chart-container">
                 <h3 style="margin-bottom:30px">Croissance des Revenus Mensuels</h3>
                 <canvas id="mainChart"></canvas>
-            </div>
-        </section>
-
-        <section id="view-discipline" class="tab-view" style="display:none">
-            <h2 style="margin-bottom:30px">Audit Comportemental</h2>
-            <div style="display:grid; grid-template-columns: 1fr 1.5fr; gap:30px">
-                <div class="card-bank">
-                    <h3>Indice Comportemental</h3>
-                    <canvas id="disciplineRadar" style="max-height:350px"></canvas>
-                </div>
-                <div class="card-bank">
-                    <h3>Journal des Incidents Graves</h3>
-                    <table class="table-premium">
-                        <thead><tr><th>Élève</th><th>Incident</th><th>Statut</th></tr></thead>
-                        <tbody>
-                            <tr><td>Mulumba Yan</td><td>Absence Examen</td><td><span class="status-badge" style="background:var(--warning)">Averti</span></td></tr>
-                            <tr><td>Kanku Béatrice</td><td>Retard massif</td><td><span class="status-badge" style="background:var(--danger)">Convoquée</span></td></tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </section>
-
-        <section id="view-planning" class="tab-view" style="display:none">
-            <h2 style="margin-bottom:30px">Planning & Gestion des Sections</h2>
-            <div style="display:grid; grid-template-columns: 380px 1fr; gap:30px">
-                <div class="card-bank">
-                    <h3 style="margin-bottom:20px">Agenda Stratégique</h3>
-                    <div class="event-item"><strong>25 Avr :</strong> Réunion de Direction</div>
-                    <div class="event-item" style="border-color:var(--success)"><strong>02 Mai :</strong> Jury de Qualification</div>
-                    <div class="event-item"><strong>15 Mai :</strong> Clôture Frais Divers</div>
-                </div>
-                <div class="card-bank">
-                    <div style="display:flex; justify-content:space-between; margin-bottom:20px">
-                        <h3>Sections Actives</h3>
-                        <button onclick="addSectionUI()" style="background:none; border:1px solid var(--accent-gold); color:var(--accent-gold); padding:5px 15px; border-radius:8px; cursor:pointer">+ Ajouter une filière</button>
-                    </div>
-                    <div id="sections-box" style="margin-bottom:30px"></div>
-                    <h3>Réussite Comparative par Option</h3>
-                    <canvas id="sectionsBarChart" style="max-height:250px"></canvas>
-                </div>
             </div>
         </section>
 
@@ -229,20 +187,21 @@
             <h2 style="margin-bottom:30px">Journal de Caisse Centralisé</h2>
             <div class="card-bank" style="width:100%">
                 <table class="table-premium">
-                    <thead><tr><th>Ref</th><th>Élève</th><th>Motif</th><th>Montant</th><th>Date</th></tr></thead>
+                    <thead><tr><th>Ref</th><th>Élève</th><th>Montant</th><th>Date</th></tr></thead>
                     <tbody id="fin-body"></tbody>
                 </table>
             </div>
         </section>
-    </main>
-        <script>
+        
+        </main>
+
+    <script>
         // --- CONFIGURATION SUPABASE ---
         const SUPABASE_URL = "https://chpydetdbfugwwhsvgin.supabase.co"; 
         const SUPABASE_KEY = "sb_publishable_G3rNGdnIihPNVfaLj1C4VQ_1TUBFh_z"; 
         const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         let charts = {};
-        let currentSections = ["Génie Électrique", "Commerciale", "Scientifique"];
 
         // --- MOTEUR DE NAVIGATION ---
         function switchTab(viewId, element) {
@@ -251,24 +210,38 @@
             document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
             element.classList.add('active');
 
-            // Déclencheurs de données
-            if(viewId === 'general') { loadGlobalStats(); initMainChart(); }
-            if(viewId === 'discipline') initDisciplineRadar();
-            if(viewId === 'planning') { renderSectionsUI(); initSectionsChart(); }
+            if(viewId === 'general') loadGlobalStats();
             if(viewId === 'eleves') loadElevesData();
             if(viewId === 'finances') loadFinancesData();
         }
 
-        // --- GRAPH 1 : FINANCES (LIGNE) ---
-        function initMainChart() {
+        // --- SYNC SUPABASE : STATS GLOBALES ---
+        async function loadGlobalStats() {
+            // 1. Nombre d'élèves
+            const { count } = await supabase.from('students').select('*', { count: 'exact', head: true });
+            document.getElementById('val-eleves').innerText = count || 0;
+
+            // 2. Total des paiements
+            const { data: payments } = await supabase.from('payments').select('amount');
+            const total = payments ? payments.reduce((sum, p) => sum + parseFloat(p.amount), 0) : 0;
+            document.getElementById('val-finance').innerText = total.toLocaleString() + " $";
+
+            initMainChart(payments);
+        }
+
+        // --- GRAPH : REVENUS ---
+        function initMainChart(paymentData) {
             const ctx = document.getElementById('mainChart').getContext('2d');
             if(charts.main) charts.main.destroy();
+            
+            // Simulation de répartition mensuelle basée sur les données réelles si disponibles
             charts.main = new Chart(ctx, {
                 type: 'line',
                 data: {
                     labels: ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin'],
                     datasets: [{
-                        data: [5000, 7200, 6800, 9500, 8400, 12000],
+                        label: 'Revenus ($)',
+                        data: [5000, 7200, 6800, 9500, 8400, 12000], // À lier dynamiquement par mois plus tard
                         borderColor: '#B45309',
                         backgroundColor: 'rgba(180, 83, 9, 0.1)',
                         borderWidth: 4, tension: 0.4, fill: true
@@ -278,96 +251,32 @@
             });
         }
 
-        // --- GRAPH 2 : DISCIPLINE (RADAR) ---
-        function initDisciplineRadar() {
-            const ctx = document.getElementById('disciplineRadar').getContext('2d');
-            if(charts.radar) charts.radar.destroy();
-            charts.radar = new Chart(ctx, {
-                type: 'radar',
-                data: {
-                    labels: ['Ponctualité', 'Uniforme', 'Résultats', 'Respect', 'Participation'],
-                    datasets: [{
-                        data: [80, 95, 70, 85, 90],
-                        backgroundColor: 'rgba(180, 83, 9, 0.2)',
-                        borderColor: '#B45309',
-                        pointBackgroundColor: '#B45309'
-                    }]
-                },
-                options: { 
-                    scales: { r: { grid: { color: 'rgba(255,255,255,0.1)' }, angleLines: { color: 'rgba(255,255,255,0.1)' } } },
-                    plugins: { legend: { display: false } }
-                }
-            });
-        }
-
-        // --- GESTION DES FILIÈRES DYNAMIQUES ---
-        function renderSectionsUI() {
-            const box = document.getElementById('sections-box');
-            box.innerHTML = currentSections.map(s => `
-                <div class="section-pill">${s} <i class="fa-solid fa-circle-xmark" onclick="removeSectionUI('${s}')" style="cursor:pointer"></i></div>
-            `).join('');
-        }
-
-        function addSectionUI() {
-            const n = prompt("Nom de la filière :");
-            if(n) { currentSections.push(n); renderSectionsUI(); initSectionsChart(); }
-        }
-
-        function removeSectionUI(n) {
-            currentSections = currentSections.filter(x => x !== n);
-            renderSectionsUI(); initSectionsChart();
-        }
-
-        function initSectionsChart() {
-            const ctx = document.getElementById('sectionsBarChart').getContext('2d');
-            if(charts.bar) charts.bar.destroy();
-            charts.bar = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: currentSections,
-                    datasets: [{
-                        data: currentSections.map(() => Math.floor(Math.random() * 40) + 60),
-                        backgroundColor: '#B45309'
-                    }]
-                },
-                options: { plugins: { legend: { display: false } } }
-            });
-        }
-
-        // --- SYNC SUPABASE : STATS ---
-        async function loadGlobalStats() {
-            const { count } = await supabase.from('eleves').select('*', { count: 'exact', head: true });
-            document.getElementById('val-eleves').innerText = count || 0;
-            const { data } = await supabase.from('finances').select('montant_paye');
-            const total = data ? data.reduce((s, i) => s + i.montant_paye, 0) : 0;
-            document.getElementById('val-finance').innerText = total.toLocaleString() + " $";
-        }
-
-        // --- SYNC SUPABASE : ELEVES & BADGES ---
+        // --- SYNC SUPABASE : ÉLÈVES & BADGES ---
         async function loadElevesData() {
-            const { data } = await supabase.from('eleves').select('*');
+            const { data } = await supabase.from('students').select('*, classes(name)');
             const b = document.getElementById('eleves-list-body'); b.innerHTML = "";
             data.forEach(e => {
-                b.innerHTML += `<tr onclick="generateBadge('${e.matricule}', '${e.nom}', '${e.postnom}')" style="cursor:pointer">
+                b.innerHTML += `
+                <tr onclick="generateBadge('${e.matricule}', '${e.full_name}', '${e.classes?.name || 'N/A'}')" style="cursor:pointer">
                     <td><span class="status-badge" style="background:#1e293b; color:var(--gold-bright)">${e.matricule}</span></td>
-                    <td><b>${e.nom} ${e.postnom}</b></td>
+                    <td><b>${e.full_name}</b></td>
                     <td><i class="fa-solid fa-chevron-right" style="color:var(--accent-gold)"></i></td>
                 </tr>`;
             });
         }
 
-        function generateBadge(mat, nom, post) {
+        function generateBadge(mat, nom, classe) {
             const box = document.getElementById('badge-display');
             box.innerHTML = `
                 <div class="id-card-visual">
                     <div style="display:flex; gap:25px; align-items:center">
                         <div style="width:90px; height:90px; background:#1e293b; border:2px solid var(--accent-gold); border-radius:15px; display:flex; align-items:center; justify-content:center; font-size:40px; color:var(--accent-gold)">
-                            <i class="fa-solid fa-user-tie"></i>
+                            <i class="fa-solid fa-user-graduate"></i>
                         </div>
                         <div>
                             <p style="font-size:9px; color:var(--accent-gold); letter-spacing:2px">PLATINUM ID : ${mat}</p>
-                            <h2 style="margin:5px 0; font-size:20px">${nom} ${post}</h2>
-                            <p style="font-size:11px; color:var(--text-dim)">Option Électricité | 2024-2025</p>
+                            <h2 style="margin:5px 0; font-size:18px">${nom}</h2>
+                            <p style="font-size:11px; color:var(--text-dim)">${classe} | 2025-2026</p>
                         </div>
                     </div>
                     <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-top:35px">
@@ -383,22 +292,26 @@
             new QRCode(document.getElementById("qr-target"), { text: mat, width: 60, height: 60 });
         }
 
-        // --- SYNC SUPABASE : FINANCES ---
+        // --- SYNC SUPABASE : JOURNAL DE CAISSE ---
         async function loadFinancesData() {
-            const { data } = await supabase.from('finances').select('*').order('date_paiement', {ascending:false});
+            const { data } = await supabase.from('payments').select('*, students(full_name)').order('payment_date', {ascending:false});
             const b = document.getElementById('fin-body'); b.innerHTML = "";
             data.forEach(f => {
                 b.innerHTML += `<tr>
-                    <td><small>#${f.id}</small></td>
-                    <td><b>${f.nom_eleve}</b></td>
-                    <td>${f.motif_paiement}</td>
-                    <td style="color:var(--success); font-weight:800">+ ${f.montant_paye} $</td>
-                    <td>${new Date(f.date_paiement).toLocaleDateString()}</td>
+                    <td><small>#${f.receipt_number}</small></td>
+                    <td><b>${f.students?.full_name || 'Inconnu'}</b></td>
+                    <td style="color:var(--success); font-weight:800">+ ${f.amount} $</td>
+                    <td>${new Date(f.payment_date).toLocaleDateString()}</td>
                 </tr>`;
             });
         }
 
-        window.onload = () => { loadGlobalStats(); initMainChart(); };
+        async function handleLogout() {
+            await supabase.auth.signOut();
+            window.location.href = 'index.html';
+        }
+
+        window.onload = () => { loadGlobalStats(); };
     </script>
 </body>
 </html>
