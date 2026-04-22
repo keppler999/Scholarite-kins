@@ -3,61 +3,80 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Scholarite Debug | Mobile</title>
+    <title>Scholarite Platinum | Connexion Sécurisée</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
     <style>
-        body { font-family: sans-serif; padding: 20px; background: #0F172A; color: white; }
-        .card { background: white; color: #333; padding: 20px; border-radius: 10px; }
-        input { width: 100%; padding: 15px; margin: 10px 0; box-sizing: border-box; font-size: 18px; }
-        button { width: 100%; padding: 15px; background: #B45309; color: white; border: none; font-weight: bold; }
-        #debug-box { margin-top: 20px; padding: 10px; background: #000; color: #00FF00; font-family: monospace; font-size: 12px; border-radius: 5px; overflow-y: auto; max-height: 150px; }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700;900&display=swap');
+
+        :root {
+            --accent: #B45309;
+            --bg: #020617;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: white;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0;
+            background-image: 
+                radial-gradient(circle at 20% 30%, rgba(180, 83, 9, 0.15) 0%, transparent 40%),
+                radial-gradient(circle at 80% 70%, rgba(30, 41, 59, 0.5) 0%, transparent 40%);
+        }
+
+        /* CARD DE CONNEXION EFFECT VERRE */
+        .login-card {
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(20px);
+            padding: 50px;
+            border-radius: 32px;
+            border: 1px solid rgba(180, 83, 9, 0.3);
+            width: 100%;
+            max-width: 450px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+            text-align: center;
+        }
+
+        .logo-area { margin-bottom: 40px; }
+        .logo-area h1 { font-size: 28px; font-weight: 900; letter-spacing: 4px; color: var(--accent); margin: 0; }
+        .logo-area p { font-size: 10px; text-transform: uppercase; letter-spacing: 2px; color: #64748B; margin-top: 5px; }
+
+        .input-group { margin-bottom: 20px; text-align: left; }
+        .input-group label { display: block; font-size: 12px; color: #94A3B8; margin-bottom: 8px; margin-left: 5px; }
+        
+        .input-field {
+            width: 100%;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid #1E293B;
+            padding: 15px;
+            border-radius: 12px;
+            color: white;
+            font-size: 15px;
+            transition: 0.3s;
+        }
+        .input-field:focus { border-color: var(--accent); outline: none; box-shadow: 0 0 15px rgba(180, 83, 9, 0.2); }
+
+        .btn-login {
+            width: 100%;
+            background: var(--accent);
+            color: white;
+            border: none;
+            padding: 16px;
+            border-radius: 12px;
+            font-weight: 800;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: 0.3s;
+        }
+        .btn-login:hover { transform: translateY(-2px); box-shadow: 0 10px 20px rgba(180, 83, 9, 0.3); }
+
+        .footer-links { margin-top: 30px; font-size: 13px; color: #64748B; }
+        .footer-links a { color: var(--accent); text-decoration: none; }
     </style>
 </head>
-<body>
-
-    <div class="card">
-        <h2>Connexion Scholarite</h2>
-        <input type="text" id="tokenInput" placeholder="SCH-2026">
-        <button onclick="verifierAcces()">DÉVERROUILLER</button>
-    </div>
-
-    <div id="debug-box">Système prêt... En attente d'action.</div>
-
-    <script>
-        const log = (msg) => { document.getElementById('debug-box').innerHTML += "<br>> " + msg; };
-
-        const SUPABASE_URL = "https://chpydetdbfugwwhsvgin.supabase.co"; 
-        const SUPABASE_KEY = "sb_publishable_G3rNGdnIihPNVfaLj1C4VQ_1TUBFh_z"; 
-        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
-        async function verifierAcces() {
-            const code = document.getElementById('tokenInput').value.trim().toUpperCase();
-            log("Tentative avec : " + code);
-
-            try {
-                const { data, error } = await supabase
-                    .from('jetons_acces')
-                    .select('*')
-                    .eq('code_jeton', code)
-                    .maybeSingle();
-
-                if (error) {
-                    log("ERREUR SUPABASE : " + error.message);
-                    alert("Erreur : " + error.message);
-                    return;
-                }
-
-                if (data) {
-                    log("SUCCESS : Jeton trouvé ! Redirection...");
-                    window.location.href = "dashboard-promoteur.html";
-                } else {
-                    log("ÉCHEC : Code inconnu dans la table jetons_acces.");
-                    alert("Code non reconnu.");
-                }
-            } catch (err) {
-                log("ERREUR SYSTÈME : " + err.message);
-            }
-        }
-    </script>
-</body>
-</html>
