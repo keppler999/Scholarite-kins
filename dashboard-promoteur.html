@@ -23,7 +23,6 @@
             --sidebar-w: 280px;
             --success: #10B981;
             --danger: #EF4444;
-            --warning: #F59E0B;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; outline: none; }
@@ -49,9 +48,9 @@
             z-index: 1000; 
         }
         .sidebar-brand { padding: 45px 30px; border-bottom: 1px solid rgba(255,255,255,0.05); }
-        .logo-main { font-size: 24px; font-weight: 900; color: var(--accent-gold); letter-spacing: 3px; text-shadow: 0 0 20px rgba(180, 83, 9, 0.3); }
+        .logo-main { font-size: 24px; font-weight: 900; color: var(--accent-gold); letter-spacing: 3px; }
         
-        .nav-menu { padding: 30px 0; flex-grow: 1; overflow-y: auto; }
+        .nav-menu { padding: 30px 0; flex-grow: 1; }
         .nav-link { 
             padding: 18px 30px; 
             display: flex; 
@@ -60,7 +59,7 @@
             color: var(--text-dim); 
             text-decoration: none; 
             cursor: pointer; 
-            transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: 0.3s;
             border-left: 4px solid transparent;
         }
         .nav-link:hover, .nav-link.active { 
@@ -69,249 +68,209 @@
             border-left-color: var(--accent-gold); 
         }
 
-        /* --- CONTENU PRINCIPAL --- */
+        /* --- CONTENU --- */
         .main-container { margin-left: var(--sidebar-w); flex-grow: 1; padding: 50px; }
         .header-flex { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 50px; }
 
-        /* --- DASHBOARD ELEMENTS --- */
         .grid-bank { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; margin-bottom: 40px; }
         .card-bank { 
-            background: var(--card-glass); 
-            padding: 30px; 
-            border-radius: 24px; 
-            border: 1px solid rgba(255,255,255,0.05); 
-            backdrop-filter: blur(12px);
-            position: relative;
-            transition: 0.4s;
+            background: var(--card-glass); padding: 30px; border-radius: 24px; border: 1px solid rgba(255,255,255,0.05); 
+            backdrop-filter: blur(12px); transition: 0.4s;
         }
-        .card-bank:hover { transform: translateY(-8px); border-color: var(--accent-gold); box-shadow: 0 20px 40px rgba(0,0,0,0.4); }
+        .card-bank:hover { transform: translateY(-8px); border-color: var(--accent-gold); }
         .card-label { font-size: 11px; font-weight: 800; color: var(--text-dim); text-transform: uppercase; letter-spacing: 2px; }
-        .card-value { font-size: 40px; font-weight: 900; margin: 15px 0; color: #fff; letter-spacing: -1px; }
+        .card-value { font-size: 40px; font-weight: 900; margin: 15px 0; color: #fff; }
 
-        .chart-container { background: var(--card-glass); border-radius: 30px; padding: 40px; border: 1px solid rgba(255,255,255,0.05); margin-bottom: 40px; min-height: 400px; }
+        .chart-container { background: var(--card-glass); border-radius: 30px; padding: 40px; border: 1px solid rgba(255,255,255,0.05); }
         
+        /* --- BADGE STYLE --- */
         .id-card-visual {
-            width: 380px; height: 230px;
-            background: linear-gradient(135deg, #0f172a 0%, #000 100%);
-            border-radius: 20px; border: 1px solid var(--accent-gold);
-            padding: 25px; position: relative; color: #fff;
-            box-shadow: 0 30px 60px rgba(0,0,0,0.8);
-        }
-        .section-pill { 
-            padding: 6px 15px; border-radius: 20px; font-size: 11px; font-weight: 800; 
-            background: rgba(180, 83, 9, 0.1); color: var(--gold-bright); 
-            border: 1px solid var(--accent-gold); margin-right: 8px; margin-bottom: 8px; display: inline-flex; align-items: center; gap: 8px;
+            width: 380px; height: 230px; background: linear-gradient(135deg, #0f172a 0%, #000 100%);
+            border-radius: 20px; border: 1px solid var(--accent-gold); padding: 25px; position: relative; color: #fff;
+            box-shadow: 0 30px 60px rgba(0,0,0,0.8); margin: 0 auto;
         }
 
-        .event-item {
-            background: rgba(255,255,255,0.02); border-left: 4px solid var(--accent-gold);
-            padding: 20px; border-radius: 0 15px 15px 0; margin-bottom: 15px;
-        }
-
-        /* --- TABLES --- */
         .table-premium { width: 100%; border-collapse: collapse; }
-        .table-premium th { text-align: left; padding: 20px; color: var(--text-dim); border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 11px; text-transform: uppercase; }
+        .table-premium th { text-align: left; padding: 20px; color: var(--text-dim); border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 11px; }
         .table-premium td { padding: 20px; border-bottom: 1px solid rgba(255,255,255,0.02); font-size: 14px; }
-
-        .status-badge { padding: 4px 10px; border-radius: 6px; font-size: 10px; font-weight: 900; }
-
-        @media (max-width: 1024px) { 
-            .sidebar { width: 90px; } .main-container { margin-left: 90px; } 
-            .nav-text, .logo-sub { display: none; } 
-        }
     </style>
 </head>
 <body>
     <aside class="sidebar">
         <div class="sidebar-brand">
             <span class="logo-main">PLATINUM</span><br>
-            <small class="logo-sub" style="color:var(--text-dim); font-size:10px; letter-spacing:2px">ERP PROMOTEUR</small>
+            <small style="color:var(--text-dim); font-size:10px; letter-spacing:2px">ERP PROMOTEUR</small>
         </div>
         <nav class="nav-menu">
-            <div class="nav-link active" onclick="switchTab('general', this)"><i class="fa-solid fa-gauge-high"></i><span class="nav-text">Vision 360°</span></div>
-            <div class="nav-link" onclick="switchTab('finances', this)"><i class="fa-solid fa-vault"></i><span class="nav-text">Trésorerie</span></div>
-            <div class="nav-link" onclick="switchTab('eleves', this)"><i class="fa-solid fa-address-card"></i><span class="nav-text">Badges & Casier</span></div>
-            <div class="nav-link" onclick="switchTab('discipline', this)"><i class="fa-solid fa-shield-halved"></i><span class="nav-text">Discipline Radar</span></div>
-            <div class="nav-link" onclick="switchTab('planning', this)"><i class="fa-solid fa-calendar-check"></i><span class="nav-text">Planning Filières</span></div>
-            <div class="nav-link" onclick="handleLogout()" style="margin-top: 50px; color: var(--danger)"><i class="fa-solid fa-power-off"></i><span class="nav-text">Quitter</span></div>
+            <div class="nav-link active" onclick="switchTab('general', this)"><i class="fa-solid fa-gauge-high"></i>Vision 360°</div>
+            <div class="nav-link" onclick="switchTab('finances', this)"><i class="fa-solid fa-vault"></i>Trésorerie</div>
+            <div class="nav-link" onclick="switchTab('eleves', this)"><i class="fa-solid fa-address-card"></i>Badges Gold</div>
+            <div class="nav-link" onclick="handleLogout()" style="margin-top: 50px; color: var(--danger)"><i class="fa-solid fa-power-off"></i>Quitter</div>
         </nav>
     </aside>
 
     <main class="main-container">
         <section id="view-general" class="tab-view">
             <div class="header-flex">
-                <div><h1 style="font-size:32px">Dashboard Stratégique</h1><p style="color:var(--text-dim)">Analyse consolidée de l'établissement</p></div>
-                <div class="status-badge" style="background:var(--success); color:#000">SYSTÈME OPÉRATIONNEL</div>
+                <div><h1>Dashboard Stratégique</h1><p style="color:var(--text-dim)">Analyse consolidée du Collège Maranatha</p></div>
+                <div style="padding: 10px; background: var(--success); color: #000; border-radius: 8px; font-weight: 900; font-size: 10px;">SYSTÈME OPÉRATIONNEL</div>
             </div>
             
             <div class="grid-bank">
                 <div class="card-bank">
                     <div class="card-label">Encaissements Totaux</div>
                     <div class="card-value" id="val-finance">0 $</div>
-                    <div style="color:var(--success); font-size:12px"><i class="fa-solid fa-caret-up"></i> Flux réel consolidé</div>
+                    <div style="color:var(--success); font-size:12px"><i class="fa-solid fa-caret-up"></i> Flux réel synchrone</div>
                 </div>
                 <div class="card-bank">
-                    <div class="card-label">Inscriptions Actives</div>
+                    <div class="card-label">Élèves Inscrits</div>
                     <div class="card-value" id="val-eleves">0</div>
                     <div style="color:var(--text-dim); font-size:12px">Effectif total base</div>
-                </div>
-                <div class="card-bank">
-                    <div class="card-label">Moyenne Générale</div>
-                    <div class="card-value" id="val-discipline">...</div>
-                    <div style="color:var(--accent-gold); font-size:12px">Standard Platinum</div>
                 </div>
             </div>
 
             <div class="chart-container">
-                <h3 style="margin-bottom:30px">Croissance des Revenus Mensuels</h3>
+                <h3 style="margin-bottom:30px">Courbe des Revenus</h3>
                 <canvas id="mainChart"></canvas>
             </div>
         </section>
 
         <section id="view-eleves" class="tab-view" style="display:none">
-            <h2 style="margin-bottom:30px">Casier Virtuel & Générateur de Badges</h2>
+            <h2 style="margin-bottom:30px">Générateur de Badges Magnétiques</h2>
             <div style="display:grid; grid-template-columns: 1fr 420px; gap:40px">
                 <div class="card-bank">
                     <table class="table-premium">
-                        <thead><tr><th>Matricule</th><th>Identité</th><th>Action</th></tr></thead>
+                        <thead><tr><th>Matricule</th><th>Identité</th><th>Classe</th></tr></thead>
                         <tbody id="eleves-list-body"></tbody>
                     </table>
                 </div>
-                <div id="badge-display" style="display:flex; flex-direction:column; align-items:center; gap:30px">
-                    <p style="color:var(--text-dim)">Sélectionnez un élève pour générer le Badge Gold</p>
+                <div id="badge-display">
+                    <p style="text-align:center; color:var(--text-dim)">Cliquez sur un élève pour prévisualiser son badge.</p>
                 </div>
             </div>
         </section>
 
         <section id="view-finances" class="tab-view" style="display:none">
             <h2 style="margin-bottom:30px">Journal de Caisse Centralisé</h2>
-            <div class="card-bank" style="width:100%">
+            <div class="card-bank">
                 <table class="table-premium">
-                    <thead><tr><th>Ref</th><th>Élève</th><th>Montant</th><th>Date</th></tr></thead>
+                    <thead><tr><th>Élève</th><th>Motif</th><th>Montant</th><th>Date</th></tr></thead>
                     <tbody id="fin-body"></tbody>
                 </table>
             </div>
         </section>
-        
-        </main>
+    </main>
 
     <script>
-        // --- CONFIGURATION SUPABASE ---
+        // --- CONNEXION CONFIGURÉE ---
         const SUPABASE_URL = "https://chpydetdbfugwwhsvgin.supabase.co"; 
         const SUPABASE_KEY = "sb_publishable_G3rNGdnIihPNVfaLj1C4VQ_1TUBFh_z"; 
-        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        let charts = {};
+        let myChart = null;
 
-        // --- MOTEUR DE NAVIGATION ---
         function switchTab(viewId, element) {
             document.querySelectorAll('.tab-view').forEach(v => v.style.display = 'none');
             document.getElementById('view-' + viewId).style.display = 'block';
             document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
             element.classList.add('active');
 
-            if(viewId === 'general') loadGlobalStats();
-            if(viewId === 'eleves') loadElevesData();
-            if(viewId === 'finances') loadFinancesData();
+            if(viewId === 'general') loadStats();
+            if(viewId === 'eleves') loadBadges();
+            if(viewId === 'finances') loadFinances();
         }
 
-        // --- SYNC SUPABASE : STATS GLOBALES ---
-        async function loadGlobalStats() {
-            // 1. Nombre d'élèves
-            const { count } = await supabase.from('students').select('*', { count: 'exact', head: true });
+        async function loadStats() {
+            // Count Eleves
+            const { count } = await _supabase.from('eleves').select('*', { count: 'exact', head: true });
             document.getElementById('val-eleves').innerText = count || 0;
 
-            // 2. Total des paiements
-            const { data: payments } = await supabase.from('payments').select('amount');
-            const total = payments ? payments.reduce((sum, p) => sum + parseFloat(p.amount), 0) : 0;
+            // Total Finance
+            const { data: fin } = await _supabase.from('finances').select('montant_paye');
+            const total = fin ? fin.reduce((s, f) => s + parseFloat(f.montant_paye), 0) : 0;
             document.getElementById('val-finance').innerText = total.toLocaleString() + " $";
 
-            initMainChart(payments);
+            initChart(fin);
         }
 
-        // --- GRAPH : REVENUS ---
-        function initMainChart(paymentData) {
+        function initChart(data) {
             const ctx = document.getElementById('mainChart').getContext('2d');
-            if(charts.main) charts.main.destroy();
-            
-            // Simulation de répartition mensuelle basée sur les données réelles si disponibles
-            charts.main = new Chart(ctx, {
+            if(myChart) myChart.destroy();
+            myChart = new Chart(ctx, {
                 type: 'line',
                 data: {
-                    labels: ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin'],
+                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
                     datasets: [{
                         label: 'Revenus ($)',
-                        data: [5000, 7200, 6800, 9500, 8400, 12000], // À lier dynamiquement par mois plus tard
+                        data: [450, 780, 1200, 950, 1500, 2100], // Exemple
                         borderColor: '#B45309',
-                        backgroundColor: 'rgba(180, 83, 9, 0.1)',
-                        borderWidth: 4, tension: 0.4, fill: true
+                        tension: 0.4,
+                        fill: true,
+                        backgroundColor: 'rgba(180, 83, 9, 0.1)'
                     }]
                 },
-                options: { plugins: { legend: { display: false } }, scales: { y: { grid: { color: 'rgba(255,255,255,0.05)' } } } }
+                options: { plugins: { legend: { display: false } } }
             });
         }
 
-        // --- SYNC SUPABASE : ÉLÈVES & BADGES ---
-        async function loadElevesData() {
-            const { data } = await supabase.from('students').select('*, classes(name)');
-            const b = document.getElementById('eleves-list-body'); b.innerHTML = "";
-            data.forEach(e => {
-                b.innerHTML += `
-                <tr onclick="generateBadge('${e.matricule}', '${e.full_name}', '${e.classes?.name || 'N/A'}')" style="cursor:pointer">
-                    <td><span class="status-badge" style="background:#1e293b; color:var(--gold-bright)">${e.matricule}</span></td>
-                    <td><b>${e.full_name}</b></td>
-                    <td><i class="fa-solid fa-chevron-right" style="color:var(--accent-gold)"></i></td>
-                </tr>`;
-            });
+        async function loadBadges() {
+            const { data } = await _supabase.from('eleves').select('*, classes(nom)');
+            const b = document.getElementById('eleves-list-body');
+            b.innerHTML = data.map(e => `
+                <tr onclick="generateGoldBadge('${e.matricule}', '${e.nom} ${e.postnom}', '${e.classes?.nom}')" style="cursor:pointer">
+                    <td><span style="color:var(--accent-gold); font-weight:800">${e.matricule}</span></td>
+                    <td><b>${e.nom} ${e.postnom}</b></td>
+                    <td>${e.classes?.nom || 'N/A'}</td>
+                </tr>
+            `).join('');
         }
 
-        function generateBadge(mat, nom, classe) {
-            const box = document.getElementById('badge-display');
-            box.innerHTML = `
+        function generateGoldBadge(mat, nom, classe) {
+            const display = document.getElementById('badge-display');
+            display.innerHTML = `
                 <div class="id-card-visual">
-                    <div style="display:flex; gap:25px; align-items:center">
-                        <div style="width:90px; height:90px; background:#1e293b; border:2px solid var(--accent-gold); border-radius:15px; display:flex; align-items:center; justify-content:center; font-size:40px; color:var(--accent-gold)">
+                    <div style="display:flex; gap:20px; align-items:center">
+                        <div style="width:70px; height:70px; background:#1e293b; border:1px solid var(--accent-gold); border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:30px; color:var(--accent-gold)">
                             <i class="fa-solid fa-user-graduate"></i>
                         </div>
                         <div>
-                            <p style="font-size:9px; color:var(--accent-gold); letter-spacing:2px">PLATINUM ID : ${mat}</p>
-                            <h2 style="margin:5px 0; font-size:18px">${nom}</h2>
-                            <p style="font-size:11px; color:var(--text-dim)">${classe} | 2025-2026</p>
+                            <p style="font-size:8px; color:var(--accent-gold)">ID PLATINUM : ${mat}</p>
+                            <h2 style="font-size:16px; margin:2px 0">${nom}</h2>
+                            <p style="font-size:10px; color:var(--text-dim)">${classe}</p>
                         </div>
                     </div>
-                    <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-top:35px">
-                        <div id="qr-target" style="background:#fff; padding:5px; border-radius:8px"></div>
+                    <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-top:30px">
+                        <div id="qr-code" style="background:#fff; padding:5px; border-radius:5px"></div>
                         <div style="text-align:right">
-                            <p style="font-size:8px; color:var(--accent-gold)">LE PROMOTEUR</p>
-                            <div style="width:120px; height:1px; background:var(--accent-gold); margin-top:5px"></div>
+                            <p style="font-size:7px; color:var(--accent-gold)">DIRECTION GÉNÉRALE</p>
+                            <div style="width:100px; height:1px; background:var(--accent-gold); margin-top:4px"></div>
                         </div>
                     </div>
                 </div>
-                <button onclick="window.print()" style="width:100%; background:var(--accent-gold); border:none; padding:15px; border-radius:12px; font-weight:900; cursor:pointer; color:#000">IMPRIMER LE BADGE</button>
+                <button onclick="window.print()" style="width:100%; margin-top:20px; padding:15px; background:var(--accent-gold); border:none; border-radius:12px; font-weight:900; cursor:pointer">IMPRIMER BADGE</button>
             `;
-            new QRCode(document.getElementById("qr-target"), { text: mat, width: 60, height: 60 });
+            new QRCode(document.getElementById("qr-code"), { text: mat, width: 50, height: 50 });
         }
 
-        // --- SYNC SUPABASE : JOURNAL DE CAISSE ---
-        async function loadFinancesData() {
-            const { data } = await supabase.from('payments').select('*, students(full_name)').order('payment_date', {ascending:false});
-            const b = document.getElementById('fin-body'); b.innerHTML = "";
-            data.forEach(f => {
-                b.innerHTML += `<tr>
-                    <td><small>#${f.receipt_number}</small></td>
-                    <td><b>${f.students?.full_name || 'Inconnu'}</b></td>
-                    <td style="color:var(--success); font-weight:800">+ ${f.amount} $</td>
-                    <td>${new Date(f.payment_date).toLocaleDateString()}</td>
-                </tr>`;
-            });
+        async function loadFinances() {
+            const { data } = await _supabase.from('finances').select('*').order('date_paiement', {ascending:false});
+            const b = document.getElementById('fin-body');
+            b.innerHTML = data.map(f => `
+                <tr>
+                    <td><b>${f.nom_eleve}</b></td>
+                    <td>${f.motif_paiement}</td>
+                    <td style="color:var(--success); font-weight:800">${f.montant_paye} $</td>
+                    <td>${new Date(f.date_paiement).toLocaleDateString()}</td>
+                </tr>
+            `).join('');
         }
 
         async function handleLogout() {
-            await supabase.auth.signOut();
+            await _supabase.auth.signOut();
             window.location.href = 'index.html';
         }
 
-        window.onload = () => { loadGlobalStats(); };
+        window.onload = loadStats;
     </script>
 </body>
 </html>
