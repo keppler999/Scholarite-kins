@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scholarite | Portail Parents</title>
+    
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap');
+
+        :root {
+            --family-green: #10B981;
+            --bg: #F1F5F9;
+            --card: #FFFFFF;
+            --text: #0F172A;
+            --danger: #EF4444;
+            --warning: #F59E0B;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); padding-bottom: 90px; }
+
+        /* --- HEADER & PROFIL --- */
+        .header { background: linear-gradient(135deg, #064E3B 0%, #10B981 100%); color: white; padding: 30px 20px; border-radius: 0 0 40px 40px; }
+        .profile-section { display: flex; align-items: center; gap: 20px; }
+        .avatar { width: 65px; height: 65px; border-radius: 20px; border: 3px solid rgba(255,255,255,0.3); }
+
+        /* --- ALERTES CRITIQUES --- */
+        .notification-bar { margin: -20px 20px 20px; background: white; padding: 18px; border-radius: 20px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.05); display: flex; align-items: center; gap: 15px; border-left: 5px solid var(--warning); }
+
+        /* --- CONTENEUR PRINCIPAL --- */
+        .container { padding: 0 20px; }
+        .section-title { margin: 25px 0 15px; font-size: 16px; font-weight: 800; color: #64748B; text-transform: uppercase; letter-spacing: 1px; }
+
+        /* --- CARDS --- */
+        .card { background: var(--card); border-radius: 24px; padding: 20px; border: 1px solid #E2E8F0; margin-bottom: 15px; }
+
+        /* --- FINANCES --- */
+        .finance-status { display: flex; justify-content: space-between; align-items: center; }
+        .progress-container { height: 12px; background: #E2E8F0; border-radius: 6px; margin: 15px 0; overflow: hidden; }
+        .progress-bar { height: 100%; background: var(--family-green); width: 65%; border-radius: 6px; }
+
+        /* --- GRILLE DE MENU --- */
+        .quick-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; }
+        .grid-item { background: white; padding: 20px; border-radius: 24px; text-align: center; border: 1px solid #E2E8F0; }
+        .grid-item i { font-size: 24px; color: var(--family-green); margin-bottom: 10px; }
+
+        /* --- DISCIPLINE & ASSIDUITÉ --- */
+        .stats-row { display: flex; gap: 10px; }
+        .stat-box { flex: 1; padding: 15px; border-radius: 18px; text-align: center; }
+        .stat-absent { background: #FEE2E2; color: var(--danger); }
+        .stat-conduct { background: #ECFDF5; color: var(--family-green); }
+
+        /* --- BOTTOM NAVIGATION --- */
+        .bottom-nav { position: fixed; bottom: 0; width: 100%; background: white; border-top: 1px solid #E2E8F0; display: flex; justify-content: space-around; padding: 12px 0; }
+        .nav-link { text-align: center; color: #94A3B8; text-decoration: none; font-size: 11px; font-weight: 700; }
+        .nav-link.active { color: var(--family-green); }
+        .nav-link i { font-size: 22px; display: block; margin-bottom: 4px; }
+    </style>
+</head>
+<body>
+
+    <header class="header">
+        <div class="profile-section">
+            <img src="https://ui-avatars.com/api/?name=Kambale+Marc&background=fff&color=10B981" class="avatar">
+            <div>
+                <h2 style="font-size: 20px;">Marc Kambale</h2>
+                <p style="font-size: 13px; opacity: 0.9;">3ème Électricité | Mat: 26-045</p>
+            </div>
+        </div>
+    </header>
+
+    <div class="notification-bar">
+        <i class="fa-solid fa-circle-exclamation" style="color: var(--warning); font-size: 24px;"></i>
+        <div>
+            <p style="font-size: 13px; font-weight: 700;">Rappel de paiement</p>
+            <p style="font-size: 11px; color: #64748B;">Solder la 2ème tranche avant le 25 Avril.</p>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="stats-row">
+            <div class="stat-box stat-absent">
+                <h3 style="font-size: 20px;">2</h3>
+                <small>Absences</small>
+            </div>
+            <div class="stat-box stat-conduct">
+                <h3 style="font-size: 20px;">A</h3>
+                <small>Conduite</small>
+            </div>
+        </div>
+
+        <h3 class="section-title">Suivi Financier</h3>
+        <div class="card">
+            <div class="finance-status">
+                <span style="font-weight: 700;">Frais Scolaires</span>
+                <span style="color: var(--family-green); font-weight: 800;">300 / 450 $</span>
+            </div>
+            <div class="progress-container">
+                <div class="progress-bar"></div>
+            </div>
+            <p style="font-size: 12px; color: #64748B;">Prochain versement attendu : 150 $</p>
+        </div>
+
+        <h3 class="section-title">Menu Rapide</h3>
+        <div class="quick-grid">
+            <div class="grid-item">
+                <i class="fa-solid fa-file-pdf"></i>
+                <p style="font-size: 12px; font-weight: 700;">Bulletins</p>
+            </div>
+            <div class="grid-item">
+                <i class="fa-solid fa-calendar-check"></i>
+                <p style="font-size: 12px; font-weight: 700;">Absences</p>
+            </div>
+            <div class="grid-item">
+                <i class="fa-solid fa-book"></i>
+                <p style="font-size: 12px; font-weight: 700;">Devoirs</p>
+            </div>
+            <div class="grid-item">
+                <i class="fa-solid fa-envelope"></i>
+                <p style="font-size: 12px; font-weight: 700;">Direction</p>
+            </div>
+        </div>
+
+        <h3 class="section-title">Dernières Notes</h3>
+        <div class="card">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
+                <span>Électricité Industrielle</span>
+                <b style="color: var(--family-green);">16/20</b>
+            </div>
+            <div style="display: flex; justify-content: space-between;">
+                <span>Installation Domestique</span>
+                <b style="color: var(--warning);">11/20</b>
+            </div>
+        </div>
+    </div>
+
+    <nav class="bottom-nav">
+        <a href="#" class="nav-link active"><i class="fa-solid fa-house"></i>Accueil</a>
+        <a href="#" class="nav-link"><i class="fa-solid fa-chart-line"></i>Notes</a>
+        <a href="#" class="nav-link"><i class="fa-solid fa-wallet"></i>Frais</a>
+        <a href="#" class="nav-link"><i class="fa-solid fa-comment-dots"></i>Chat</a>
+    </nav>
+
+    <script>
+        // Logique pour récupérer les données en temps réel
+        document.addEventListener('DOMContentLoaded', () => {
+            // Ici l'IA peut injecter le statut réel depuis le module comptable
+            const payProgress = 66; // Exemple calculé
+            document.querySelector('.progress-bar').style.width = payProgress + '%';
+        });
+    </script>
+</body>
+</html>
